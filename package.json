@@ -1,0 +1,45 @@
+{
+    "name": "@netless/sync-player",
+    "version": "0.0.1",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "homepage": "https://github.com/netless-io/sync-player",
+    "license": "MIT",
+    "scripts": {
+        "start": "webpack serve --open --progress --config webpack/webpack.dev.js",
+        "build": "webpack --progress --config webpack/webpack.prod.js && tsc --emitDeclarationOnly"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.14.0",
+        "@babel/plugin-proposal-class-properties": "^7.13.0",
+        "@babel/plugin-transform-runtime": "^7.13.15",
+        "@babel/preset-env": "^7.14.1",
+        "@babel/preset-typescript": "^7.13.0",
+        "@netless/eslint-plugin": "^1.1.1",
+        "@types/video.js": "^7.3.17",
+        "@typescript-eslint/eslint-plugin": "^4.23.0",
+        "@typescript-eslint/parser": "^4.23.0",
+        "babel-loader": "^8.2.2",
+        "babel-plugin-const-enum": "^1.0.1",
+        "css-loader": "^5.2.4",
+        "eslint": "^7.26.0",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-plugin-prettier": "^3.4.0",
+        "eslint-webpack-plugin": "^2.5.4",
+        "fork-ts-checker-webpack-plugin": "^6.2.7",
+        "html-webpack-plugin": "4",
+        "prettier": "^2.3.0",
+        "style-loader": "^2.0.0",
+        "typescript": "^4.2.4",
+        "webpack": "^4.44.2",
+        "webpack-cli": "^4.7.0",
+        "webpack-dev-server": "^3.11.2",
+        "webpack-merge": "^5.7.3",
+        "white-web-sdk": "^2.12.16"
+    },
+    "dependencies": {
+        "@babel/runtime": "^7.14.0",
+        "eventemitter3": "^4.0.7",
+        "video.js": "^7.11.8"
+    }
+}
