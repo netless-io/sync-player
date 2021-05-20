@@ -1,6 +1,8 @@
 import { AtomPlayer } from "./Players/AtomPlayer";
 import { StateMachinePlayer } from "./Players/StateMachinePlayer";
 
+export { VideoPlayer } from "./Players/VideoPlayer";
+
 export interface SyncPlayerConfig {
     players: AtomPlayer[];
 }
