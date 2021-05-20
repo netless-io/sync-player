@@ -27,8 +27,8 @@ export class StateMachinePlayer extends AtomPlayer {
         this.rowPlayer.on("timeupdate", this.onRowPlayerTimeChanged);
         this.colPlayer.on("timeupdate", this.onColPlayerTimeChanged);
 
-        this.rowPlayer.on("durationchange", this.onPlayerDurationChanged);
-        this.colPlayer.on("durationchange", this.onPlayerDurationChanged);
+        this.rowPlayer.on("durationchange", this.onRowPlayerDurationChanged);
+        this.colPlayer.on("durationchange", this.onColPlayerDurationChanged);
     }
 
     public destroy(): void {
@@ -43,8 +43,8 @@ export class StateMachinePlayer extends AtomPlayer {
         this.rowPlayer.off("timeupdate", this.onRowPlayerTimeChanged);
         this.colPlayer.off("timeupdate", this.onColPlayerTimeChanged);
 
-        this.rowPlayer.off("durationchange", this.onPlayerDurationChanged);
-        this.colPlayer.off("durationchange", this.onPlayerDurationChanged);
+        this.rowPlayer.off("durationchange", this.onRowPlayerDurationChanged);
+        this.colPlayer.off("durationchange", this.onColPlayerDurationChanged);
     }
 
     public get duration(): number {
@@ -71,8 +71,16 @@ export class StateMachinePlayer extends AtomPlayer {
         await Promise.all([this.rowPlayer.seek(ms), this.colPlayer.seek(ms)]);
     }
 
-    private onPlayerDurationChanged = (): void => {
-        this.emit("durationchange");
+    private onRowPlayerDurationChanged = (): void => {
+        if (this.rowPlayer.duration !== this.duration) {
+            this.emit("durationchange");
+        }
+    };
+
+    private onColPlayerDurationChanged = (): void => {
+        if (this.colPlayer.duration !== this.duration) {
+            this.emit("durationchange");
+        }
     };
 
     private onRowPlayerStatusChanged = (): void => {

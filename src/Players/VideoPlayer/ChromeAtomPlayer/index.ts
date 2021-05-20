@@ -44,12 +44,6 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video.off("durationchange", this.onDurationChanged);
     };
 
-    private _duration: number = 0;
-
-    public get duration(): number {
-        return this._duration;
-    }
-
     protected async readyImpl(): Promise<void> {
         this.video.pause();
     }
@@ -93,7 +87,6 @@ export class ChromeAtomPlayer extends AtomPlayer {
     };
 
     private onDurationChanged = (): void => {
-        this._duration = (this.video.duration() || 0) * 1000;
-        this.emit("durationchange");
+        this.duration = (this.video.duration() || 0) * 1000;
     };
 }

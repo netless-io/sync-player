@@ -53,6 +53,18 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         }
     }
 
+    public get duration(): number {
+        return this._duration;
+    }
+
+    public set duration(ms: number) {
+        ms = Math.floor(ms);
+        if (this._duration !== ms) {
+            this._duration = ms;
+            this.emit("durationchange");
+        }
+    }
+
     public async play(): Promise<void> {
         if (this._status !== AtomPlayerStatus.Playing && this._status !== AtomPlayerStatus.Ended) {
             await this.playImpl();
@@ -122,8 +134,6 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public abstract destroy(): void;
-
-    public abstract get duration(): number;
 
     protected abstract readyImpl(): Promise<void>;
     protected abstract playImpl(): Promise<void>;
