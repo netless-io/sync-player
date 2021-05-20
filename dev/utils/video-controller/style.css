@@ -1,0 +1,64 @@
+.video {
+    background-color: #111;
+}
+
+.sync-player-controller {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 24px;
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    bottom: 50px;
+    transform: translateX(-50%);
+    width: 50vw;
+    background: #f1f1f1;
+    border-radius: 20px;
+    color: #010101;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    user-select: none;
+}
+
+.sync-player-controller > * {
+    margin-right: 24px;
+}
+
+.sync-player-controller > *:last-child {
+    margin-right: 0;
+}
+
+.sync-player-play-pause {
+    cursor: pointer;
+}
+
+.sync-player-play-pause::after {
+    content: "Paused";
+}
+
+.sync-player-play-pause.sync-player--playing::after {
+    content: "Playing";
+}
+
+.sync-player-progress {
+    overflow: hidden;
+    flex: 1;
+    height: 8px;
+    background: rgba(60, 60, 60, 0.6);
+    border-radius: 6px;
+    transition: height 0.1s ease-in-out;
+    cursor: pointer;
+}
+
+.sync-player-progress-filled {
+    background: #0094ff;
+    width: 0%;
+    height: 100%;
+    border-radius: 6px;
+    transition: all 0.1s;
+}
+
+.sync-player-time {
+    white-space: nowrap;
+    word-break: keep-all;
+}

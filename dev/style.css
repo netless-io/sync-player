@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+body.many-videos {
+    justify-content: left;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
