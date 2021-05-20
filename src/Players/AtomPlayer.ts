@@ -1,4 +1,5 @@
 import EventEmitter from "eventemitter3";
+import { isPlaybackRateEqual, normalizePlaybackRate } from "../utils/playbackrate";
 
 export const enum AtomPlayerStatus {
     /** Idle State. It acts like Pause but ready to be changed into any other state. */
@@ -21,10 +22,6 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         this.name = config?.name;
     }
 
-    private _status: AtomPlayerStatus = AtomPlayerStatus.Ready;
-
-    private _currentTime: number = 0;
-
     public get isPlaying(): boolean {
         return (
             this._status === AtomPlayerStatus.Playing || this._status === AtomPlayerStatus.Buffering
@@ -46,9 +43,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         return this._currentTime;
     }
 
-    public set currentTime(value: number) {
-        if (this._status !== AtomPlayerStatus.Ended && this._currentTime !== value) {
-            this._currentTime = value;
+    public set currentTime(ms: number) {
+        ms = Math.floor(ms);
+        if (this._status !== AtomPlayerStatus.Ended && this._currentTime !== ms) {
+            this._currentTime = ms;
             this.emit("timeupdate");
         }
     }
@@ -62,6 +60,19 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         if (this._duration !== ms) {
             this._duration = ms;
             this.emit("durationchange");
+        }
+    }
+
+    public get playbackRate(): number {
+        return this._playbackRate;
+    }
+
+    public set playbackRate(value: number) {
+        const rate = normalizePlaybackRate(value);
+        if (!isPlaybackRateEqual(this._playbackRate, rate)) {
+            this.setPlaybackRateImpl(rate);
+            this._playbackRate = rate;
+            this.emit("ratechange");
         }
     }
 
@@ -92,6 +103,8 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async seek(ms: number): Promise<void> {
+        ms = Math.floor(ms);
+
         if (ms === this._currentTime) {
             return;
         }
@@ -140,11 +153,20 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     protected abstract pauseImpl(): Promise<void>;
     protected abstract stopImpl(): Promise<void>;
     protected abstract seekImpl(ms: number): Promise<void>;
+    protected abstract setPlaybackRateImpl(value: number): void;
+
+    private _status: AtomPlayerStatus = AtomPlayerStatus.Ready;
+
+    private _currentTime: number = 0;
+
+    private _duration: number = 0;
+
+    private _playbackRate: number = 1;
 
     private _ignoreSetStatus: boolean = false;
 }
 
-export type AtomPlayerEvents = "status" | "timeupdate" | "durationchange";
+export type AtomPlayerEvents = "status" | "timeupdate" | "durationchange" | "ratechange";
 
 export declare interface AtomPlayer {
     addListener<U extends AtomPlayerEvents>(event: U, listener: () => void): this;

@@ -62,3 +62,56 @@
     white-space: nowrap;
     word-break: keep-all;
 }
+
+.sync-player-playback-rate-container {
+    position: relative;
+    padding: 1em 0;
+    margin-top: -1em;
+    margin-bottom: -1em;
+    cursor: pointer;
+}
+
+.sync-player-playback-rate-panel {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 50px;
+    font-size: 12px;
+    padding: 0 10px;
+    background: #f1f1f1;
+    border-radius: 10px;
+    color: #777;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    opacity: 0;
+    z-index: -1;
+    transition: all 0.2s;
+}
+
+.sync-player-playback-rate-panel:hover,
+.sync-player-playback-rate-container:hover > .sync-player-playback-rate-panel {
+    opacity: 1;
+    z-index: 200;
+}
+
+.sync-player-playback-rate {
+    overflow: hidden;
+    flex: 1;
+    height: 8px;
+    margin: 0 0.5em;
+    background: rgba(60, 60, 60, 0.6);
+    border-radius: 6px;
+    transition: height 0.1s ease-in-out;
+    cursor: pointer;
+}
+
+.sync-player-playback-rate-filled {
+    background: #0094ff;
+    width: 0%;
+    height: 100%;
+    border-radius: 6px;
+    transition: all 0.1s;
+}

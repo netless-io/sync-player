@@ -64,6 +64,10 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video.currentTime(ms / 1000);
     }
 
+    protected setPlaybackRateImpl(value: number): void {
+        this.video.playbackRate(value);
+    }
+
     private handleStatusChanged = (): void => {
         if (this.status === AtomPlayerStatus.Ended) {
             return;
@@ -83,7 +87,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
     };
 
     private updateCurrentTime = (): void => {
-        this.currentTime = Math.floor((this.video.currentTime() || 0) * 1000);
+        this.currentTime = (this.video.currentTime() || 0) * 1000;
     };
 
     private onDurationChanged = (): void => {

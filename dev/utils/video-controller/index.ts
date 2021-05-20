@@ -9,7 +9,17 @@ export function videoController(syncPlayer: AtomPlayer): void {
             <div class="sync-player-progress">
                 <div class="sync-player-progress-filled"></div>
             </div>
-            <div class="sync-player-time">00:00:00 / 00:00:00</div>
+            <div class="sync-player-playback-rate-container">
+                <span class="sync-player-playback-rate-content">1.0</span> X
+                <div class="sync-player-playback-rate-panel">
+                    0.0
+                    <div class="sync-player-playback-rate">
+                        <div class="sync-player-playback-rate-filled"></div>
+                    </div>
+                    2.0
+                </div>
+            </div>
+            <div class="sync-player-time">00:00 / 00:00</div>
         </div>`;
     document.body.appendChild($controller);
 
@@ -17,6 +27,13 @@ export function videoController(syncPlayer: AtomPlayer): void {
     const $progress = document.querySelector<HTMLDivElement>(".sync-player-progress")!;
     const $progressFilled = document.querySelector<HTMLDivElement>(".sync-player-progress-filled")!;
     const $time = document.querySelector<HTMLDivElement>(".sync-player-time")!;
+    const $playbackRateContent = document.querySelector<HTMLDivElement>(
+        ".sync-player-playback-rate-content",
+    )!;
+    const $playbackRate = document.querySelector<HTMLDivElement>(".sync-player-playback-rate")!;
+    const $playbackRateFilled = document.querySelector<HTMLDivElement>(
+        ".sync-player-playback-rate-filled",
+    )!;
 
     $playPause.addEventListener("click", () => {
         if (syncPlayer.isPlaying) {
@@ -30,17 +47,29 @@ export function videoController(syncPlayer: AtomPlayer): void {
         syncPlayer.seek((event.offsetX / $progress.offsetWidth) * syncPlayer.duration);
     });
 
-    syncPlayer.on("timeupdate", () => {
+    $playbackRate.addEventListener("click", event => {
+        syncPlayer.playbackRate = (event.offsetX / $playbackRate.offsetWidth) * 2;
+    });
+
+    syncPlayer.on("status", () => {
+        $playPause.classList.toggle("sync-player--playing", syncPlayer.isPlaying);
+    });
+
+    const updateTime = (): void => {
         if (syncPlayer.duration > 0) {
             const currentTime = syncPlayer.currentTime || 0;
             $progressFilled.style.width = `${(currentTime / syncPlayer.duration) * 100}%`;
 
             $time.textContent = `${renderTime(currentTime)} / ${renderTime(syncPlayer.duration)}`;
         }
-    });
+    };
 
-    syncPlayer.on("status", () => {
-        $playPause.classList.toggle("sync-player--playing", syncPlayer.isPlaying);
+    syncPlayer.on("timeupdate", updateTime);
+    syncPlayer.on("durationchange", updateTime);
+
+    syncPlayer.on("ratechange", () => {
+        $playbackRateContent.textContent = syncPlayer.playbackRate.toFixed(1);
+        $playbackRateFilled.style.width = `${(syncPlayer.playbackRate / 2) * 100}%`;
     });
 
     function renderTime(ms: number): string {

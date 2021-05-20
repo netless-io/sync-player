@@ -1,4 +1,5 @@
 import { SyncPlayerStateMachine } from "../../SyncPlayerStateMachine";
+import { isPlaybackRateEqual } from "../../utils/playbackrate";
 import { AtomPlayer, AtomPlayerStatus } from "../AtomPlayer";
 
 export interface StateMachinePlayerConfig {
@@ -29,6 +30,9 @@ export class StateMachinePlayer extends AtomPlayer {
 
         this.rowPlayer.on("durationchange", this.onRowPlayerDurationChanged);
         this.colPlayer.on("durationchange", this.onColPlayerDurationChanged);
+
+        this.rowPlayer.on("ratechange", this.onRowPlayerRateChanged);
+        this.colPlayer.on("ratechange", this.onColPlayerRateChanged);
     }
 
     public destroy(): void {
@@ -45,6 +49,9 @@ export class StateMachinePlayer extends AtomPlayer {
 
         this.rowPlayer.off("durationchange", this.onRowPlayerDurationChanged);
         this.colPlayer.off("durationchange", this.onColPlayerDurationChanged);
+
+        this.rowPlayer.on("ratechange", this.onRowPlayerRateChanged);
+        this.colPlayer.on("ratechange", this.onColPlayerRateChanged);
     }
 
     public get duration(): number {
@@ -71,6 +78,11 @@ export class StateMachinePlayer extends AtomPlayer {
         await Promise.all([this.rowPlayer.seek(ms), this.colPlayer.seek(ms)]);
     }
 
+    protected setPlaybackRateImpl(value: number): void {
+        this.rowPlayer.playbackRate = value;
+        this.colPlayer.playbackRate = value;
+    }
+
     private onRowPlayerDurationChanged = (): void => {
         if (this.rowPlayer.duration !== this.duration) {
             this.emit("durationchange");
@@ -80,6 +92,19 @@ export class StateMachinePlayer extends AtomPlayer {
     private onColPlayerDurationChanged = (): void => {
         if (this.colPlayer.duration !== this.duration) {
             this.emit("durationchange");
+        }
+    };
+
+    private onRowPlayerRateChanged = (): void => {
+        if (!isPlaybackRateEqual(this.rowPlayer.playbackRate, this.playbackRate)) {
+            this.emit("ratechange");
+        }
+    };
+
+    private onColPlayerRateChanged = (): void => {
+        if (!isPlaybackRateEqual(this.colPlayer.playbackRate, this.playbackRate)) {
+            this.playbackRate = this.colPlayer.playbackRate;
+            this.emit("ratechange");
         }
     };
 
