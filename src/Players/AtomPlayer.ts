@@ -85,8 +85,8 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public async pause(): Promise<void> {
         if (this._status !== AtomPlayerStatus.Pause && this._status !== AtomPlayerStatus.Ended) {
-            await this.pauseImpl();
             this.status = AtomPlayerStatus.Pause;
+            await this.pauseImpl();
         }
     }
 
@@ -141,8 +141,8 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public async ready(): Promise<void> {
         if (this._status !== AtomPlayerStatus.Ready) {
-            await this.readyImpl();
             this.status = AtomPlayerStatus.Ready;
+            await this.readyImpl();
         }
     }
 
