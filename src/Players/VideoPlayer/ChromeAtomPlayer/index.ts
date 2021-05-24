@@ -68,20 +68,18 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video.playbackRate(value);
     }
 
-    private handleStatusChanged = (): void => {
+    private handleStatusChanged = (e?: Event): void => {
         if (this.status === AtomPlayerStatus.Ended) {
             return;
         }
 
         if (this.video.paused()) {
-            if (Math.abs(this.currentTime - this.duration) < 100) {
-                // a pause event may fired before ended
-                this.status = AtomPlayerStatus.Ended;
-            } else if (
-                this.status !== AtomPlayerStatus.Pause &&
-                this.status !== AtomPlayerStatus.Ready
-            ) {
-                this.status = AtomPlayerStatus.Buffering;
+            if (this.status !== AtomPlayerStatus.Pause && this.status !== AtomPlayerStatus.Ready) {
+                if (e?.type === "pause") {
+                    this.status = AtomPlayerStatus.Ready;
+                } else {
+                    this.status = AtomPlayerStatus.Buffering;
+                }
             }
         } else {
             this.status = AtomPlayerStatus.Playing;
