@@ -64,13 +64,17 @@ export function videoController(syncPlayer: AtomPlayer): void {
         }
     };
 
-    syncPlayer.on("timeupdate", updateTime);
-    syncPlayer.on("durationchange", updateTime);
-
-    syncPlayer.on("ratechange", () => {
+    const updateRate = (): void => {
         $playbackRateContent.textContent = syncPlayer.playbackRate.toFixed(1);
         $playbackRateFilled.style.width = `${(syncPlayer.playbackRate / 2) * 100}%`;
-    });
+    };
+
+    updateTime();
+    updateRate();
+
+    syncPlayer.on("timeupdate", updateTime);
+    syncPlayer.on("durationchange", updateTime);
+    syncPlayer.on("ratechange", updateRate);
 
     function renderTime(ms: number): string {
         const seconds = ms / 1000;
