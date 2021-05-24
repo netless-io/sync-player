@@ -1,5 +1,5 @@
 import { AtomPlayer } from "./Players/AtomPlayer";
-import { StateMachinePlayer } from "./Players/StateMachinePlayer";
+import { ClusterPlayer } from "./Players/ClusterPlayer";
 
 export { VideoPlayer } from "./Players/VideoPlayer";
 export { WhiteboardPlayer } from "./Players/WhiteboardPlayer";
@@ -13,6 +13,6 @@ export interface SyncPlayerConfig {
 export const SyncPlayer = function SyncPlayer(config: SyncPlayerConfig): AtomPlayer {
     return config.players.reduce(
         (combinedPlayer, player) =>
-            new StateMachinePlayer({ rowPlayer: combinedPlayer, colPlayer: player }),
+            new ClusterPlayer({ rowPlayer: combinedPlayer, colPlayer: player }),
     );
 } as unknown as new (config: SyncPlayerConfig) => AtomPlayer;

@@ -81,17 +81,13 @@ export class WhiteboardPlayer extends AtomPlayer {
                 this.status = SyncPlayerStatus.Playing;
                 break;
             }
-            case PlayerPhase.Pause: {
+            default: {
                 if (
                     this.status !== SyncPlayerStatus.Pause &&
                     this.status !== SyncPlayerStatus.Ready
                 ) {
                     this.status = SyncPlayerStatus.Buffering;
                 }
-                break;
-            }
-            default: {
-                this.status = SyncPlayerStatus.Buffering;
                 break;
             }
         }
