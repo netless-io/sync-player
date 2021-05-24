@@ -12,6 +12,8 @@ export class StateMachinePlayer extends AtomPlayer {
     private readonly colPlayer: AtomPlayer;
     private readonly stateMachine: SyncPlayerStateMachine;
 
+    private longerPlayer: AtomPlayer;
+
     public constructor(config: StateMachinePlayerConfig) {
         super({
             name: `{${config.rowPlayer.name || "unknown"}-${config.colPlayer.name || "unknown"}}`,
@@ -19,6 +21,9 @@ export class StateMachinePlayer extends AtomPlayer {
 
         this.rowPlayer = config.rowPlayer;
         this.colPlayer = config.colPlayer;
+
+        this.longerPlayer =
+            this.rowPlayer.duration >= this.colPlayer.duration ? this.rowPlayer : this.colPlayer;
 
         this.stateMachine = new SyncPlayerStateMachine({ ...config, name: this.name });
 
@@ -55,7 +60,7 @@ export class StateMachinePlayer extends AtomPlayer {
     }
 
     public get duration(): number {
-        return Math.max(this.rowPlayer.duration, this.colPlayer.duration);
+        return this.longerPlayer.duration;
     }
 
     protected async readyImpl(): Promise<void> {
@@ -84,13 +89,25 @@ export class StateMachinePlayer extends AtomPlayer {
     }
 
     private onRowPlayerDurationChanged = (): void => {
-        if (this.rowPlayer.duration !== this.duration) {
+        if (this.longerPlayer !== this.rowPlayer) {
+            if (this.rowPlayer.duration > this.colPlayer.duration) {
+                this.longerPlayer = this.rowPlayer;
+            }
+        }
+
+        if (this.longerPlayer === this.rowPlayer && this.rowPlayer.duration !== this.duration) {
             this.emit("durationchange");
         }
     };
 
     private onColPlayerDurationChanged = (): void => {
-        if (this.colPlayer.duration !== this.duration) {
+        if (this.longerPlayer !== this.colPlayer) {
+            if (this.colPlayer.duration > this.rowPlayer.duration) {
+                this.longerPlayer = this.colPlayer;
+            }
+        }
+
+        if (this.longerPlayer === this.colPlayer && this.colPlayer.duration !== this.duration) {
             this.emit("durationchange");
         }
     };
@@ -109,11 +126,15 @@ export class StateMachinePlayer extends AtomPlayer {
     };
 
     private onRowPlayerStatusChanged = (): void => {
-        return this.onSubPlayerStatusChanged(this.rowPlayer, this.colPlayer);
+        if (this.rowPlayer === this.longerPlayer) {
+            this.onSubPlayerStatusChanged(this.rowPlayer, this.colPlayer);
+        }
     };
 
     private onColPlayerStatusChanged = (): void => {
-        return this.onSubPlayerStatusChanged(this.colPlayer, this.rowPlayer);
+        if (this.colPlayer === this.longerPlayer) {
+            this.onSubPlayerStatusChanged(this.colPlayer, this.rowPlayer);
+        }
     };
 
     private onSubPlayerStatusChanged(emitter: AtomPlayer, receptor: AtomPlayer): void {
@@ -162,13 +183,19 @@ export class StateMachinePlayer extends AtomPlayer {
     }
 
     private onRowPlayerTimeChanged = (): void => {
-        if (this.rowPlayer.status !== AtomPlayerStatus.Ended) {
+        if (
+            this.longerPlayer === this.rowPlayer &&
+            this.rowPlayer.status !== AtomPlayerStatus.Ended
+        ) {
             this.currentTime = this.rowPlayer.currentTime;
         }
     };
 
     private onColPlayerTimeChanged = (): void => {
-        if (this.colPlayer.status !== AtomPlayerStatus.Ended) {
+        if (
+            this.longerPlayer === this.colPlayer &&
+            this.colPlayer.status !== AtomPlayerStatus.Ended
+        ) {
             this.currentTime = this.colPlayer.currentTime;
         }
     };
