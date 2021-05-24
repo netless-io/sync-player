@@ -74,7 +74,13 @@ export class ChromeAtomPlayer extends AtomPlayer {
         }
 
         if (this.video.paused()) {
-            if (this.status !== AtomPlayerStatus.Pause && this.status !== AtomPlayerStatus.Ready) {
+            if (Math.abs(this.currentTime - this.duration) < 100) {
+                // a pause event may fired before ended
+                this.status = AtomPlayerStatus.Ended;
+            } else if (
+                this.status !== AtomPlayerStatus.Pause &&
+                this.status !== AtomPlayerStatus.Ready
+            ) {
                 this.status = AtomPlayerStatus.Buffering;
             }
         } else {
