@@ -1,5 +1,6 @@
-import { AtomPlayer, AtomPlayerStatus } from "../AtomPlayer";
 import { Player, PlayerPhase } from "white-web-sdk";
+import { AtomPlayer } from "../AtomPlayer";
+import { SyncPlayerStatus } from "../../Types";
 
 export interface WhiteboardPlayerConfig {
     name?: string;
@@ -66,31 +67,31 @@ export class WhiteboardPlayer extends AtomPlayer {
     }
 
     private handleStatusChanged = (): void => {
-        if (this.status === AtomPlayerStatus.Ended) {
+        if (this.status === SyncPlayerStatus.Ended) {
             return;
         }
 
         switch (this.player.phase) {
             case PlayerPhase.Ended:
             case PlayerPhase.Stopped: {
-                this.status = AtomPlayerStatus.Ended;
+                this.status = SyncPlayerStatus.Ended;
                 break;
             }
             case PlayerPhase.Playing: {
-                this.status = AtomPlayerStatus.Playing;
+                this.status = SyncPlayerStatus.Playing;
                 break;
             }
             case PlayerPhase.Pause: {
                 if (
-                    this.status !== AtomPlayerStatus.Pause &&
-                    this.status !== AtomPlayerStatus.Ready
+                    this.status !== SyncPlayerStatus.Pause &&
+                    this.status !== SyncPlayerStatus.Ready
                 ) {
-                    this.status = AtomPlayerStatus.Buffering;
+                    this.status = SyncPlayerStatus.Buffering;
                 }
                 break;
             }
             default: {
-                this.status = AtomPlayerStatus.Buffering;
+                this.status = SyncPlayerStatus.Buffering;
                 break;
             }
         }

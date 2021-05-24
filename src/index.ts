@@ -2,6 +2,9 @@ import { AtomPlayer } from "./Players/AtomPlayer";
 import { StateMachinePlayer } from "./Players/StateMachinePlayer";
 
 export { VideoPlayer } from "./Players/VideoPlayer";
+export { WhiteboardPlayer } from "./Players/WhiteboardPlayer";
+
+export type { SyncPlayerStatus } from "./Types";
 
 export interface SyncPlayerConfig {
     players: AtomPlayer[];

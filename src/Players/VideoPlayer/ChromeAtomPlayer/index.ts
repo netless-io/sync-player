@@ -1,5 +1,6 @@
 import { VideoJsPlayer } from "video.js";
-import { AtomPlayer, AtomPlayerStatus } from "../../AtomPlayer";
+import { AtomPlayer } from "../../AtomPlayer";
+import { SyncPlayerStatus } from "../../../Types";
 import { VideoPlayerConfig } from "../Types";
 
 export class ChromeAtomPlayer extends AtomPlayer {
@@ -69,25 +70,25 @@ export class ChromeAtomPlayer extends AtomPlayer {
     }
 
     private handleStatusChanged = (e?: Event): void => {
-        if (this.status === AtomPlayerStatus.Ended) {
+        if (this.status === SyncPlayerStatus.Ended) {
             return;
         }
 
         if (this.video.paused()) {
-            if (this.status !== AtomPlayerStatus.Pause && this.status !== AtomPlayerStatus.Ready) {
+            if (this.status !== SyncPlayerStatus.Pause && this.status !== SyncPlayerStatus.Ready) {
                 if (e?.type === "pause") {
-                    this.status = AtomPlayerStatus.Ready;
+                    this.status = SyncPlayerStatus.Ready;
                 } else {
-                    this.status = AtomPlayerStatus.Buffering;
+                    this.status = SyncPlayerStatus.Buffering;
                 }
             }
         } else {
-            this.status = AtomPlayerStatus.Playing;
+            this.status = SyncPlayerStatus.Playing;
         }
     };
 
     private toEnded = (): void => {
-        this.status = AtomPlayerStatus.Ended;
+        this.status = SyncPlayerStatus.Ended;
     };
 
     private updateCurrentTime = (): void => {

@@ -1,6 +1,7 @@
 import { SyncPlayerStateMachine } from "../../SyncPlayerStateMachine";
+import { SyncPlayerStatus } from "../../Types";
 import { isPlaybackRateEqual } from "../../utils/playbackrate";
-import { AtomPlayer, AtomPlayerStatus } from "../AtomPlayer";
+import { AtomPlayer } from "../AtomPlayer";
 
 export interface StateMachinePlayerConfig {
     rowPlayer: AtomPlayer;
@@ -139,43 +140,43 @@ export class StateMachinePlayer extends AtomPlayer {
 
     private onSubPlayerStatusChanged(emitter: AtomPlayer, receptor: AtomPlayer): void {
         switch (emitter.status) {
-            case AtomPlayerStatus.Ready: {
+            case SyncPlayerStatus.Ready: {
                 switch (receptor.status) {
-                    case AtomPlayerStatus.Ready:
-                    case AtomPlayerStatus.Ended: {
-                        this.status = AtomPlayerStatus.Ready;
+                    case SyncPlayerStatus.Ready:
+                    case SyncPlayerStatus.Ended: {
+                        this.status = SyncPlayerStatus.Ready;
                         break;
                     }
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Pause: {
-                if (receptor.status !== AtomPlayerStatus.Playing) {
-                    this.status = AtomPlayerStatus.Pause;
+            case SyncPlayerStatus.Pause: {
+                if (receptor.status !== SyncPlayerStatus.Playing) {
+                    this.status = SyncPlayerStatus.Pause;
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Buffering: {
-                if (receptor.status !== AtomPlayerStatus.Pause) {
-                    this.status = AtomPlayerStatus.Buffering;
+            case SyncPlayerStatus.Buffering: {
+                if (receptor.status !== SyncPlayerStatus.Pause) {
+                    this.status = SyncPlayerStatus.Buffering;
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Playing: {
+            case SyncPlayerStatus.Playing: {
                 switch (receptor.status) {
-                    case AtomPlayerStatus.Playing:
-                    case AtomPlayerStatus.Ended: {
-                        this.status = AtomPlayerStatus.Playing;
+                    case SyncPlayerStatus.Playing:
+                    case SyncPlayerStatus.Ended: {
+                        this.status = SyncPlayerStatus.Playing;
                         break;
                     }
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Ended: {
+            case SyncPlayerStatus.Ended: {
                 this.status = receptor.status;
                 break;
             }
@@ -185,7 +186,7 @@ export class StateMachinePlayer extends AtomPlayer {
     private onRowPlayerTimeChanged = (): void => {
         if (
             this.longerPlayer === this.rowPlayer &&
-            this.rowPlayer.status !== AtomPlayerStatus.Ended
+            this.rowPlayer.status !== SyncPlayerStatus.Ended
         ) {
             this.currentTime = this.rowPlayer.currentTime;
         }
@@ -194,7 +195,7 @@ export class StateMachinePlayer extends AtomPlayer {
     private onColPlayerTimeChanged = (): void => {
         if (
             this.longerPlayer === this.colPlayer &&
-            this.colPlayer.status !== AtomPlayerStatus.Ended
+            this.colPlayer.status !== SyncPlayerStatus.Ended
         ) {
             this.currentTime = this.colPlayer.currentTime;
         }

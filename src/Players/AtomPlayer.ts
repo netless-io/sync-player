@@ -1,18 +1,6 @@
 import EventEmitter from "eventemitter3";
+import { SyncPlayerStatus } from "../Types";
 import { isPlaybackRateEqual, normalizePlaybackRate } from "../utils/playbackrate";
-
-export const enum AtomPlayerStatus {
-    /** Idle State. It acts like Pause but ready to be changed into any other state. */
-    Ready = "Ready",
-    /** Video is paused intentionally. */
-    Pause = "Pause",
-    /** Buffering is only happened during playing process. */
-    Buffering = "Buffering",
-    /** Video is playing. */
-    Playing = "Playing",
-    /** Video is ended. */
-    Ended = "Ended",
-}
 
 export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     public readonly name?: string;
@@ -24,15 +12,15 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public get isPlaying(): boolean {
         return (
-            this._status === AtomPlayerStatus.Playing || this._status === AtomPlayerStatus.Buffering
+            this._status === SyncPlayerStatus.Playing || this._status === SyncPlayerStatus.Buffering
         );
     }
 
-    public get status(): AtomPlayerStatus {
+    public get status(): SyncPlayerStatus {
         return this._status;
     }
 
-    public set status(value: AtomPlayerStatus) {
+    public set status(value: SyncPlayerStatus) {
         if (!this._ignoreSetStatus && this._status !== value) {
             this._status = value;
             this.emit("status");
@@ -45,7 +33,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public set currentTime(ms: number) {
         ms = Math.floor(ms);
-        if (this._status !== AtomPlayerStatus.Ended && this._currentTime !== ms) {
+        if (this._status !== SyncPlayerStatus.Ended && this._currentTime !== ms) {
             this._currentTime = ms;
             this.emit("timeupdate");
         }
@@ -77,23 +65,23 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async play(): Promise<void> {
-        if (this._status !== AtomPlayerStatus.Playing && this._status !== AtomPlayerStatus.Ended) {
+        if (this._status !== SyncPlayerStatus.Playing && this._status !== SyncPlayerStatus.Ended) {
             await this.playImpl();
-            this.status = AtomPlayerStatus.Playing;
+            this.status = SyncPlayerStatus.Playing;
         }
     }
 
     public async pause(): Promise<void> {
-        if (this._status !== AtomPlayerStatus.Pause && this._status !== AtomPlayerStatus.Ended) {
-            this.status = AtomPlayerStatus.Pause;
+        if (this._status !== SyncPlayerStatus.Pause && this._status !== SyncPlayerStatus.Ended) {
+            this.status = SyncPlayerStatus.Pause;
             await this.pauseImpl();
         }
     }
 
     public async stop(): Promise<void> {
-        if (this._status !== AtomPlayerStatus.Ended) {
+        if (this._status !== SyncPlayerStatus.Ended) {
             // set ended first
-            this.status = AtomPlayerStatus.Ended;
+            this.status = SyncPlayerStatus.Ended;
 
             this._ignoreSetStatus = true;
             await this.readyImpl();
@@ -122,17 +110,17 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         await this.seekImpl(ms);
 
         switch (lastStatus) {
-            case AtomPlayerStatus.Ready:
-            case AtomPlayerStatus.Ended: {
+            case SyncPlayerStatus.Ready:
+            case SyncPlayerStatus.Ended: {
                 await this.ready();
                 break;
             }
-            case AtomPlayerStatus.Pause: {
+            case SyncPlayerStatus.Pause: {
                 await this.pause();
                 break;
             }
-            case AtomPlayerStatus.Buffering:
-            case AtomPlayerStatus.Playing: {
+            case SyncPlayerStatus.Buffering:
+            case SyncPlayerStatus.Playing: {
                 await this.play();
                 break;
             }
@@ -140,8 +128,8 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async ready(): Promise<void> {
-        if (this._status !== AtomPlayerStatus.Ready) {
-            this.status = AtomPlayerStatus.Ready;
+        if (this._status !== SyncPlayerStatus.Ready) {
+            this.status = SyncPlayerStatus.Ready;
             await this.readyImpl();
         }
     }
@@ -155,7 +143,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     protected abstract seekImpl(ms: number): Promise<void>;
     protected abstract setPlaybackRateImpl(value: number): void;
 
-    private _status: AtomPlayerStatus = AtomPlayerStatus.Ready;
+    private _status: SyncPlayerStatus = SyncPlayerStatus.Ready;
 
     private _currentTime: number = 0;
 

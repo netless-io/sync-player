@@ -1,4 +1,5 @@
-import { AtomPlayer, AtomPlayerStatus } from "../Players/AtomPlayer";
+import { AtomPlayer } from "../Players/AtomPlayer";
+import { SyncPlayerStatus } from "../Types";
 import { Logger } from "../utils/Logger";
 
 export interface SyncPlayerStateMachineConfig {
@@ -44,27 +45,27 @@ export class SyncPlayerStateMachine {
 
     private onPlayerChange = async (emitter: AtomPlayer, receptor: AtomPlayer): Promise<void> => {
         switch (emitter.status) {
-            case AtomPlayerStatus.Pause: {
+            case SyncPlayerStatus.Pause: {
                 if (receptor.isPlaying) {
                     receptor.pause();
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Buffering: {
-                if (receptor.status === AtomPlayerStatus.Playing) {
+            case SyncPlayerStatus.Buffering: {
+                if (receptor.status === SyncPlayerStatus.Playing) {
                     emitter.play();
                 }
                 break;
             }
 
-            case AtomPlayerStatus.Playing: {
-                if (receptor.status === AtomPlayerStatus.Buffering) {
+            case SyncPlayerStatus.Playing: {
+                if (receptor.status === SyncPlayerStatus.Buffering) {
                     await emitter.ready();
                 }
 
                 if (
-                    receptor.status !== AtomPlayerStatus.Ended ||
+                    receptor.status !== SyncPlayerStatus.Ended ||
                     emitter.currentTime < receptor.duration
                 ) {
                     receptor.play();
