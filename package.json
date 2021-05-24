@@ -35,11 +35,14 @@
         "webpack-cli": "^4.7.0",
         "webpack-dev-server": "^3.11.2",
         "webpack-merge": "^5.7.3",
-        "white-web-sdk": "^2.12.16"
+        "white-web-sdk": "^2.12.19"
     },
     "dependencies": {
         "@babel/runtime": "^7.14.0",
         "eventemitter3": "^4.0.7",
         "video.js": "^7.11.8"
+    },
+    "peerDependencies": {
+        "white-web-sdk": ">=2"
     }
 }
