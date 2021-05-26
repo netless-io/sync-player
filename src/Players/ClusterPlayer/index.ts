@@ -220,7 +220,7 @@ export class ClusterPlayer extends AtomPlayer {
 
             case SyncPlayerStatus.Buffering: {
                 if (receptor.status === SyncPlayerStatus.Playing) {
-                    emitter.play();
+                    receptor.ready();
                 }
                 break;
             }
