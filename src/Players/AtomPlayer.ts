@@ -10,6 +10,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         this.name = config?.name;
     }
 
+    public get isReady(): boolean {
+        return this._initStatus === AtomPlayerInitStatus.Ready;
+    }
+
     public get isPlaying(): boolean {
         return (
             this._status === SyncPlayerStatus.Playing || this._status === SyncPlayerStatus.Buffering
@@ -65,13 +69,30 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async play(): Promise<void> {
+        if (!this.isReady) {
+            await this.init();
+        }
+
         if (this._status !== SyncPlayerStatus.Playing && this._status !== SyncPlayerStatus.Ended) {
-            await this.playImpl();
-            this.status = SyncPlayerStatus.Playing;
+            try {
+                await this.playImpl();
+                this.status = SyncPlayerStatus.Playing;
+            } catch (e) {
+                if (
+                    this._status !== SyncPlayerStatus.Ready &&
+                    this._status !== SyncPlayerStatus.Pause
+                ) {
+                    throw e;
+                }
+            }
         }
     }
 
     public async pause(): Promise<void> {
+        if (!this.isReady) {
+            await this.init();
+        }
+
         if (this._status !== SyncPlayerStatus.Pause && this._status !== SyncPlayerStatus.Ended) {
             this.status = SyncPlayerStatus.Pause;
             await this.pauseImpl();
@@ -79,6 +100,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async stop(): Promise<void> {
+        if (!this.isReady) {
+            await this.init();
+        }
+
         if (this._status !== SyncPlayerStatus.Ended) {
             // set ended first
             this.status = SyncPlayerStatus.Ended;
@@ -91,6 +116,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async seek(ms: number): Promise<void> {
+        if (!this.isReady) {
+            await this.init();
+        }
+
         ms = Math.floor(ms);
 
         if (ms === this._currentTime) {
@@ -127,6 +156,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async ready(silently?: boolean): Promise<void> {
+        if (!this.isReady) {
+            await this.init();
+        }
+
         if (this._status !== SyncPlayerStatus.Ready) {
             if (silently !== void 0) {
                 this.ignoreSetStatus = silently;
@@ -150,6 +183,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     protected abstract seekImpl(ms: number): Promise<void>;
     protected abstract setPlaybackRateImpl(value: number): void;
 
+    protected initImpl(): Promise<void> {
+        return Promise.resolve();
+    }
+
     protected ignoreSetStatus: boolean = false;
 
     private _status: SyncPlayerStatus = SyncPlayerStatus.Ready;
@@ -159,12 +196,37 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     private _duration: number = 0;
 
     private _playbackRate: number = 1;
+
+    private _initStatus: AtomPlayerInitStatus = AtomPlayerInitStatus.Idle;
+
+    private async init(): Promise<void> {
+        switch (this._initStatus) {
+            case AtomPlayerInitStatus.Ready: {
+                return;
+            }
+            case AtomPlayerInitStatus.Initializing: {
+                return new Promise(resolve => this.once("ready", resolve));
+            }
+            default: {
+                this._initStatus = AtomPlayerInitStatus.Initializing;
+                await this.initImpl();
+                this._initStatus = AtomPlayerInitStatus.Ready;
+                this.emit("ready");
+            }
+        }
+    }
 }
 
-export type AtomPlayerEvents = "status" | "timeupdate" | "durationchange" | "ratechange";
+export type AtomPlayerEvents = "status" | "timeupdate" | "durationchange" | "ratechange" | "ready";
 
 export declare interface AtomPlayer {
     addListener<U extends AtomPlayerEvents>(event: U, listener: () => void): this;
     on<U extends AtomPlayerEvents>(event: U, listener: () => void): this;
     once<U extends AtomPlayerEvents>(event: U, listener: () => void): this;
+}
+
+const enum AtomPlayerInitStatus {
+    Idle,
+    Initializing,
+    Ready,
 }
