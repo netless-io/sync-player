@@ -57,6 +57,10 @@ export class ClusterPlayer extends AtomPlayer {
         this.colPlayer.destroy();
     }
 
+    public get isReady(): boolean {
+        return this.rowPlayer.isReady && this.colPlayer.isReady;
+    }
+
     public get duration(): number {
         return this.longerPlayer.duration;
     }
