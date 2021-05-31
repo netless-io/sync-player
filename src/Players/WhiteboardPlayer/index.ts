@@ -26,24 +26,39 @@ export class WhiteboardPlayer extends AtomPlayer {
         this.player.callbacks.off("onProgressTimeChanged", this.updateCurrentTime);
     };
 
+    protected async initImpl(): Promise<void> {
+        const p = new Promise<void>(resolve => {
+            const { player } = this;
+            player.callbacks.on("onPhaseChanged", function fistPlay(phase: PlayerPhase) {
+                if (phase === PlayerPhase.Playing) {
+                    player.pause();
+                }
+
+                if (phase === PlayerPhase.Pause) {
+                    player.callbacks.off("onPhaseChanged", fistPlay);
+                    return resolve();
+                }
+            });
+        });
+        this.player.seekToProgressTime(0);
+
+        await p;
+    }
+
     protected async readyImpl(): Promise<void> {
         this.player.pause();
     }
 
     protected async playImpl(): Promise<void> {
         const p = new Promise<void>(resolve => {
-            let timeoutTicket: number = NaN;
             const { player } = this;
+
             function callback(phase: PlayerPhase): void {
                 if (phase === PlayerPhase.Playing) {
                     player.callbacks.off("onPhaseChanged", callback);
-                    window.clearTimeout(timeoutTicket);
                     resolve();
                 }
             }
-            timeoutTicket = window.setTimeout(() => {
-                callback(PlayerPhase.Playing);
-            }, 1000);
             player.callbacks.on("onPhaseChanged", callback);
         });
         this.player.play();
@@ -66,12 +81,12 @@ export class WhiteboardPlayer extends AtomPlayer {
         this.player.playbackSpeed = value;
     }
 
-    private handleStatusChanged = (): void => {
+    private handleStatusChanged = (phase: PlayerPhase): void => {
         if (this.status === SyncPlayerStatus.Ended) {
             return;
         }
 
-        switch (this.player.phase) {
+        switch (phase) {
             case PlayerPhase.Ended:
             case PlayerPhase.Stopped: {
                 this.status = SyncPlayerStatus.Ended;
