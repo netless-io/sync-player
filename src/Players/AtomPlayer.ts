@@ -78,7 +78,6 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         if (this._status !== SyncPlayerStatus.Playing && this._status !== SyncPlayerStatus.Ended) {
             try {
                 await this.playImpl();
-                this.status = SyncPlayerStatus.Playing;
             } catch (e) {
                 if (
                     this._status !== SyncPlayerStatus.Ready &&
