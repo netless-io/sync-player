@@ -72,6 +72,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public async play(): Promise<void> {
         if (!this.isReady) {
+            this.status = SyncPlayerStatus.Buffering;
             await this.loadInit;
         }
 
@@ -157,10 +158,6 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     public async ready(silently?: boolean): Promise<void> {
-        if (!this.isReady) {
-            await this.loadInit;
-        }
-
         if (this._status !== SyncPlayerStatus.Ready) {
             if (silently !== void 0) {
                 this.ignoreSetStatus = silently;
@@ -209,11 +206,13 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
                 return new Promise(resolve => this.once("ready", resolve));
             }
             default: {
+                this.ignoreSetStatus = true;
                 this._initStatus = AtomPlayerInitStatus.Initializing;
                 await new Promise(r => setTimeout(r));
                 await this.initImpl();
                 this._initStatus = AtomPlayerInitStatus.Ready;
                 this.emit("ready");
+                this.ignoreSetStatus = false;
             }
         }
     }

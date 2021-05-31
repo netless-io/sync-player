@@ -12,6 +12,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video = config.video;
         this.video.controls(false);
 
+        this.video.on("waiting", this.handleStatusChanged);
         this.video.on("canplay", this.handleStatusChanged);
         this.video.on("pause", this.handleStatusChanged);
         this.video.on("suspend", this.handleStatusChanged);
@@ -29,6 +30,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
     }
 
     public destroy = (): void => {
+        this.video.off("waiting", this.handleStatusChanged);
         this.video.off("canplay", this.handleStatusChanged);
         this.video.off("pause", this.handleStatusChanged);
         this.video.off("suspend", this.handleStatusChanged);
@@ -74,9 +76,16 @@ export class ChromeAtomPlayer extends AtomPlayer {
             return;
         }
 
-        if (this.video.paused()) {
+        const eventType = e?.type;
+
+        if (
+            this.video.paused() ||
+            eventType === "seeking" ||
+            eventType === "waiting" ||
+            eventType === "stalled"
+        ) {
             if (this.status !== SyncPlayerStatus.Pause && this.status !== SyncPlayerStatus.Ready) {
-                if (e?.type === "pause") {
+                if (eventType === "pause") {
                     this.status = SyncPlayerStatus.Ready;
                 } else {
                     this.status = SyncPlayerStatus.Buffering;

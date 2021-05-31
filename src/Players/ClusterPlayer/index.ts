@@ -70,7 +70,6 @@ export class ClusterPlayer extends AtomPlayer {
         // since one sub-player may not be playing
         if (this.status !== SyncPlayerStatus.Ended) {
             await this.playImpl();
-            this.status = SyncPlayerStatus.Playing;
         }
     }
 
