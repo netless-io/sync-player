@@ -4,7 +4,7 @@ import { ClusterPlayer } from "./Players/ClusterPlayer";
 export { VideoPlayer } from "./Players/VideoPlayer";
 export { WhiteboardPlayer } from "./Players/WhiteboardPlayer";
 
-export type { SyncPlayerStatus } from "./Types";
+export { SyncPlayerStatus } from "./Types";
 
 export interface SyncPlayerConfig {
     players: AtomPlayer[];
