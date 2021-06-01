@@ -216,14 +216,14 @@ export class ClusterPlayer extends AtomPlayer {
         switch (emitter.status) {
             case SyncPlayerStatus.Pause: {
                 if (receptor.isPlaying) {
-                    receptor.pause();
+                    await receptor.pause();
                 }
                 break;
             }
 
             case SyncPlayerStatus.Buffering: {
                 if (receptor.status === SyncPlayerStatus.Playing) {
-                    receptor.ready();
+                    await receptor.ready();
                 }
                 break;
             }
@@ -237,14 +237,14 @@ export class ClusterPlayer extends AtomPlayer {
                     receptor.status !== SyncPlayerStatus.Ended ||
                     emitter.currentTime < receptor.duration
                 ) {
-                    receptor.play();
+                    await receptor.play();
                     // handle frame drops
                     const diff = emitter.currentTime - receptor.currentTime;
                     if (Math.abs(diff) >= 1000) {
                         if (diff < 0) {
-                            receptor.seek(emitter.currentTime);
+                            await receptor.seek(emitter.currentTime);
                         } else {
-                            emitter.seek(receptor.currentTime);
+                            await emitter.seek(receptor.currentTime);
                         }
                     }
                 }
