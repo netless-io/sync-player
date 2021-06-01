@@ -238,6 +238,15 @@ export class ClusterPlayer extends AtomPlayer {
                     emitter.currentTime < receptor.duration
                 ) {
                     receptor.play();
+                    // handle frame drops
+                    const diff = emitter.currentTime - receptor.currentTime;
+                    if (Math.abs(diff) >= 1000) {
+                        if (diff < 0) {
+                            receptor.seek(emitter.currentTime);
+                        } else {
+                            emitter.seek(receptor.currentTime);
+                        }
+                    }
                 }
                 break;
             }
