@@ -21,6 +21,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video.on("seeking", this.handleStatusChanged);
         this.video.on("seeked", this.handleStatusChanged);
         this.video.on("stalled", this.handleStatusChanged);
+        this.video.on("canplaythrough", this.handleStatusChanged);
 
         this.video.on("ended", this.toEnded);
 
@@ -39,6 +40,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video.off("seeking", this.handleStatusChanged);
         this.video.off("seeked", this.handleStatusChanged);
         this.video.off("stalled", this.handleStatusChanged);
+        this.video.off("canplaythrough", this.handleStatusChanged);
 
         this.video.off("ended", this.toEnded);
 
@@ -60,7 +62,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
     }
 
     protected async stopImpl(): Promise<void> {
-        this.video.currentTime(this.duration);
+        this.video.currentTime(this.duration / 1000 - 0.5);
     }
 
     protected async seekImpl(ms: number): Promise<void> {
@@ -78,12 +80,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
 
         const eventType = e?.type;
 
-        if (
-            this.video.paused() ||
-            eventType === "seeking" ||
-            eventType === "waiting" ||
-            eventType === "stalled"
-        ) {
+        if (this.video.paused() || eventType === "seeking" || eventType === "waiting") {
             if (this.status !== SyncPlayerStatus.Pause && this.status !== SyncPlayerStatus.Ready) {
                 if (eventType === "pause") {
                     this.status = SyncPlayerStatus.Ready;
