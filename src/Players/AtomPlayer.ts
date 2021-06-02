@@ -135,9 +135,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
         const lastStatus = this._status;
 
-        this.ignoreSetStatus = true;
         await this.seekImpl(ms);
-        this.ignoreSetStatus = false;
 
         switch (lastStatus) {
             case SyncPlayerStatus.Ready:

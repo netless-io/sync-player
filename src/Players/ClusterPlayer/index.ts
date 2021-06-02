@@ -65,12 +65,28 @@ export class ClusterPlayer extends AtomPlayer {
         return this.longerPlayer.duration;
     }
 
+    public async ready(silently?: boolean): Promise<void> {
+        await this.readyImpl(silently);
+    }
+
     public async play(): Promise<void> {
         // Do not check this.status !== SyncPlayerStatus.Playing
         // since one sub-player may not be playing
         if (this.status !== SyncPlayerStatus.Ended) {
             await this.playImpl();
         }
+    }
+
+    public async pause(): Promise<void> {
+        await this.pauseImpl();
+    }
+
+    public async stop(): Promise<void> {
+        await this.stopImpl();
+    }
+
+    public async seek(ms: number): Promise<void> {
+        await this.seekImpl(ms);
     }
 
     protected async readyImpl(silently?: boolean): Promise<void> {
