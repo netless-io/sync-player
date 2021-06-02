@@ -242,9 +242,9 @@ export class ClusterPlayer extends AtomPlayer {
                     const diff = emitter.currentTime - receptor.currentTime;
                     if (Math.abs(diff) >= 1000) {
                         if (diff < 0) {
-                            await receptor.seek(emitter.currentTime);
-                        } else {
                             await emitter.seek(receptor.currentTime);
+                        } else {
+                            await receptor.seek(emitter.currentTime);
                         }
                     }
                 }
