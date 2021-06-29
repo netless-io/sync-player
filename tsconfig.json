@@ -30,5 +30,5 @@
         "skipDefaultLibCheck": true
     },
     "exclude": ["node_modules"],
-    "include": ["src/**/*.ts", "dev/**/*.ts", "typings/*.ts"]
+    "include": ["src/**/*.ts"]
 }
