@@ -44,5 +44,14 @@
     },
     "peerDependencies": {
         "white-web-sdk": ">=2"
-    }
+    },
+    "files": [
+      "src",
+      "typings",
+      "dist",
+      "LICENSE",
+      "package.json",
+      "yarn.lock",
+      "README.md"
+    ]
 }
