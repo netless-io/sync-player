@@ -28,6 +28,7 @@
         "eslint-webpack-plugin": "^2.5.4",
         "fork-ts-checker-webpack-plugin": "^6.2.7",
         "html-webpack-plugin": "4",
+        "peer-deps-externals-webpack-plugin": "^1.0.4",
         "prettier": "^2.3.0",
         "style-loader": "^2.0.0",
         "typescript": "^4.2.4",
@@ -46,12 +47,12 @@
         "white-web-sdk": ">=2"
     },
     "files": [
-      "src",
-      "typings",
-      "dist",
-      "LICENSE",
-      "package.json",
-      "yarn.lock",
-      "README.md"
+        "src",
+        "typings",
+        "dist",
+        "LICENSE",
+        "package.json",
+        "yarn.lock",
+        "README.md"
     ]
 }
