@@ -2,11 +2,15 @@ import EventEmitter from "eventemitter3";
 import { SyncPlayerStatus } from "../Types";
 import { isPlaybackRateEqual, normalizePlaybackRate } from "../utils/playbackrate";
 
+export interface AtomPlayerConfig {
+    name?: string;
+}
+
 export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     public readonly name?: string;
     private readonly loadInit: Promise<void>;
 
-    protected constructor(config?: { name?: string }) {
+    protected constructor(config?: AtomPlayerConfig) {
         super();
         this.name = config?.name;
         this.loadInit = this.init();
