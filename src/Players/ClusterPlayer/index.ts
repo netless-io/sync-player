@@ -1,9 +1,8 @@
 import { SyncPlayerStatus } from "../../Types";
 import { isPlaybackRateEqual } from "../../utils/playbackrate";
-import { AtomPlayer, AtomPlayerEvents } from "../AtomPlayer";
+import { AtomPlayer, AtomPlayerConfig, AtomPlayerEvents } from "../AtomPlayer";
 
-export interface ClusterPlayerConfig {
-    name?: string;
+export interface ClusterPlayerConfig extends AtomPlayerConfig {
     rowPlayer: AtomPlayer;
     colPlayer: AtomPlayer;
 }

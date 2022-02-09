@@ -1,9 +1,8 @@
 import { Player, PlayerPhase } from "white-web-sdk";
-import { AtomPlayer } from "../AtomPlayer";
+import { AtomPlayer, AtomPlayerConfig } from "../AtomPlayer";
 import { SyncPlayerStatus } from "../../Types";
 
-export interface WhiteboardPlayerConfig {
-    name?: string;
+export interface WhiteboardPlayerConfig extends AtomPlayerConfig {
     player: Player;
 }
 
