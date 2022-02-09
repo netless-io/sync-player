@@ -12,42 +12,60 @@ export class ChromeAtomPlayer extends AtomPlayer {
         this.video = config.video;
         this.video.controls(false);
 
-        this.video.on("waiting", this.handleStatusChanged);
-        this.video.on("canplay", this.handleStatusChanged);
-        this.video.on("pause", this.handleStatusChanged);
-        this.video.on("suspend", this.handleStatusChanged);
-        this.video.on("playing", this.handleStatusChanged);
-        this.video.on("play", this.handleStatusChanged);
-        this.video.on("seeking", this.handleStatusChanged);
-        this.video.on("seeked", this.handleStatusChanged);
-        this.video.on("stalled", this.handleStatusChanged);
-        this.video.on("canplaythrough", this.handleStatusChanged);
+        const addVideoListener = (type: string | string[], listener: (e?: Event) => void): void => {
+            this.video.on(type, listener);
+            this._sideEffect.addDisposer((): void => this.video.off(type, listener));
+        };
 
-        this.video.on("ended", this.toEnded);
+        addVideoListener(
+            [
+                "waiting",
+                "canplay",
+                "pause",
+                "suspend",
+                "playing",
+                "play",
+                "seeking",
+                "seeked",
+                "stalled",
+                "canplaythrough",
+            ],
+            (e?: Event): void => {
+                if (this.status === SyncPlayerStatus.Ended) {
+                    return;
+                }
 
-        this.video.on("timeupdate", this.updateCurrentTime);
+                const eventType = e?.type;
 
-        this.video.on("durationchange", this.onDurationChanged);
+                if (this.video.paused() || eventType === "seeking" || eventType === "waiting") {
+                    if (
+                        this.status !== SyncPlayerStatus.Pause &&
+                        this.status !== SyncPlayerStatus.Ready
+                    ) {
+                        if (eventType === "pause") {
+                            this.status = SyncPlayerStatus.Ready;
+                        } else {
+                            this.status = SyncPlayerStatus.Buffering;
+                        }
+                    }
+                } else {
+                    this.status = SyncPlayerStatus.Playing;
+                }
+            },
+        );
+
+        addVideoListener("ended", () => {
+            this.status = SyncPlayerStatus.Ended;
+        });
+
+        addVideoListener("timeupdate", () => {
+            this.currentTime = (this.video.currentTime() || 0) * 1000;
+        });
+
+        addVideoListener("durationchange", () => {
+            this.duration = (this.video.duration() || 0) * 1000;
+        });
     }
-
-    public destroy = (): void => {
-        this.video.off("waiting", this.handleStatusChanged);
-        this.video.off("canplay", this.handleStatusChanged);
-        this.video.off("pause", this.handleStatusChanged);
-        this.video.off("suspend", this.handleStatusChanged);
-        this.video.off("playing", this.handleStatusChanged);
-        this.video.off("play", this.handleStatusChanged);
-        this.video.off("seeking", this.handleStatusChanged);
-        this.video.off("seeked", this.handleStatusChanged);
-        this.video.off("stalled", this.handleStatusChanged);
-        this.video.off("canplaythrough", this.handleStatusChanged);
-
-        this.video.off("ended", this.toEnded);
-
-        this.video.off("timeupdate", this.updateCurrentTime);
-
-        this.video.off("durationchange", this.onDurationChanged);
-    };
 
     protected async readyImpl(): Promise<void> {
         this.video.pause();
@@ -72,36 +90,4 @@ export class ChromeAtomPlayer extends AtomPlayer {
     protected setPlaybackRateImpl(value: number): void {
         this.video.playbackRate(value);
     }
-
-    private handleStatusChanged = (e?: Event): void => {
-        if (this.status === SyncPlayerStatus.Ended) {
-            return;
-        }
-
-        const eventType = e?.type;
-
-        if (this.video.paused() || eventType === "seeking" || eventType === "waiting") {
-            if (this.status !== SyncPlayerStatus.Pause && this.status !== SyncPlayerStatus.Ready) {
-                if (eventType === "pause") {
-                    this.status = SyncPlayerStatus.Ready;
-                } else {
-                    this.status = SyncPlayerStatus.Buffering;
-                }
-            }
-        } else {
-            this.status = SyncPlayerStatus.Playing;
-        }
-    };
-
-    private toEnded = (): void => {
-        this.status = SyncPlayerStatus.Ended;
-    };
-
-    private updateCurrentTime = (): void => {
-        this.currentTime = (this.video.currentTime() || 0) * 1000;
-    };
-
-    private onDurationChanged = (): void => {
-        this.duration = (this.video.duration() || 0) * 1000;
-    };
 }

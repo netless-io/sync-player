@@ -1,6 +1,6 @@
 import { SyncPlayerStatus } from "../../Types";
 import { isPlaybackRateEqual } from "../../utils/playbackrate";
-import { AtomPlayer } from "../AtomPlayer";
+import { AtomPlayer, AtomPlayerEvents } from "../AtomPlayer";
 
 export interface ClusterPlayerConfig {
     name?: string;
@@ -27,42 +27,72 @@ export class ClusterPlayer extends AtomPlayer {
         this.longerPlayer =
             this.rowPlayer.duration >= this.colPlayer.duration ? this.rowPlayer : this.colPlayer;
 
-        this.rowPlayer.on("status", this.onRowPlayerStatusChanged);
-        this.colPlayer.on("status", this.onColPlayerStatusChanged);
+        this.duration = this.longerPlayer.duration;
+        this.playbackRate = this.longerPlayer.playbackRate;
 
-        this.rowPlayer.on("timeupdate", this.onRowPlayerTimeChanged);
-        this.colPlayer.on("timeupdate", this.onColPlayerTimeChanged);
+        const addAtomListener = (
+            event: AtomPlayerEvents,
+            listener: (emitter: AtomPlayer, receptor: AtomPlayer) => void,
+        ): void => {
+            this._sideEffect.add(() => {
+                const handler = (): void => {
+                    listener(this.rowPlayer, this.colPlayer);
+                };
+                this.rowPlayer.on(event, handler);
+                return (): void => {
+                    this.rowPlayer.off(event, handler);
+                };
+            });
+            this._sideEffect.add(() => {
+                const handler = (): void => {
+                    listener(this.colPlayer, this.rowPlayer);
+                };
+                this.colPlayer.on(event, handler);
+                return (): void => {
+                    this.colPlayer.off(event, handler);
+                };
+            });
+        };
 
-        this.rowPlayer.on("durationchange", this.onRowPlayerDurationChanged);
-        this.colPlayer.on("durationchange", this.onColPlayerDurationChanged);
+        addAtomListener("status", (emitter, receptor) => {
+            if (!this.ignoreSetStatus) {
+                this.syncSubPlayer(emitter, receptor);
+                this.updateStatus(emitter, receptor);
+            }
+        });
 
-        this.rowPlayer.on("ratechange", this.onRowPlayerRateChanged);
-        this.colPlayer.on("ratechange", this.onColPlayerRateChanged);
+        addAtomListener("timeupdate", emitter => {
+            if (this.longerPlayer === emitter && emitter.status !== SyncPlayerStatus.Ended) {
+                this.currentTime = emitter.currentTime;
+            }
+        });
+
+        addAtomListener("durationchange", (emitter, receptor) => {
+            if (emitter.duration >= this.longerPlayer.duration) {
+                if (emitter !== this.longerPlayer) {
+                    this.longerPlayer = emitter;
+                }
+            } else {
+                this.longerPlayer = receptor;
+            }
+            this.duration = this.longerPlayer.duration;
+        });
+
+        addAtomListener("ratechange", emitter => {
+            if (!isPlaybackRateEqual(emitter.playbackRate, this.playbackRate)) {
+                this.playbackRate = emitter.playbackRate;
+            }
+        });
     }
 
     public destroy(): void {
-        this.rowPlayer.off("status", this.onRowPlayerStatusChanged);
-        this.colPlayer.off("status", this.onColPlayerStatusChanged);
-
-        this.rowPlayer.off("timeupdate", this.onRowPlayerTimeChanged);
-        this.colPlayer.off("timeupdate", this.onColPlayerTimeChanged);
-
-        this.rowPlayer.off("durationchange", this.onRowPlayerDurationChanged);
-        this.colPlayer.off("durationchange", this.onColPlayerDurationChanged);
-
-        this.rowPlayer.on("ratechange", this.onRowPlayerRateChanged);
-        this.colPlayer.on("ratechange", this.onColPlayerRateChanged);
-
+        super.destroy();
         this.rowPlayer.destroy();
         this.colPlayer.destroy();
     }
 
     public get isReady(): boolean {
         return this.rowPlayer.isReady && this.colPlayer.isReady;
-    }
-
-    public get duration(): number {
-        return this.longerPlayer.duration;
     }
 
     public async ready(silently?: boolean): Promise<void> {
@@ -113,75 +143,6 @@ export class ClusterPlayer extends AtomPlayer {
         this.rowPlayer.playbackRate = value;
         this.colPlayer.playbackRate = value;
     }
-
-    private onRowPlayerDurationChanged = (): void => {
-        if (this.longerPlayer !== this.rowPlayer) {
-            if (this.rowPlayer.duration > this.colPlayer.duration) {
-                this.longerPlayer = this.rowPlayer;
-            }
-        }
-
-        if (this.longerPlayer === this.rowPlayer && this.rowPlayer.duration !== this.duration) {
-            this.emit("durationchange");
-        }
-    };
-
-    private onColPlayerDurationChanged = (): void => {
-        if (this.longerPlayer !== this.colPlayer) {
-            if (this.colPlayer.duration > this.rowPlayer.duration) {
-                this.longerPlayer = this.colPlayer;
-            }
-        }
-
-        if (this.longerPlayer === this.colPlayer && this.colPlayer.duration !== this.duration) {
-            this.emit("durationchange");
-        }
-    };
-
-    private onRowPlayerRateChanged = (): void => {
-        if (!isPlaybackRateEqual(this.rowPlayer.playbackRate, this.playbackRate)) {
-            this.emit("ratechange");
-        }
-    };
-
-    private onColPlayerRateChanged = (): void => {
-        if (!isPlaybackRateEqual(this.colPlayer.playbackRate, this.playbackRate)) {
-            this.playbackRate = this.colPlayer.playbackRate;
-            this.emit("ratechange");
-        }
-    };
-
-    private onRowPlayerTimeChanged = (): void => {
-        if (
-            this.longerPlayer === this.rowPlayer &&
-            this.rowPlayer.status !== SyncPlayerStatus.Ended
-        ) {
-            this.currentTime = this.rowPlayer.currentTime;
-        }
-    };
-
-    private onColPlayerTimeChanged = (): void => {
-        if (
-            this.longerPlayer === this.colPlayer &&
-            this.colPlayer.status !== SyncPlayerStatus.Ended
-        ) {
-            this.currentTime = this.colPlayer.currentTime;
-        }
-    };
-
-    private onRowPlayerStatusChanged = (): void => {
-        if (!this.ignoreSetStatus) {
-            this.syncSubPlayer(this.rowPlayer, this.colPlayer);
-            this.updateStatus(this.rowPlayer, this.colPlayer);
-        }
-    };
-
-    private onColPlayerStatusChanged = (): void => {
-        if (!this.ignoreSetStatus) {
-            this.syncSubPlayer(this.colPlayer, this.rowPlayer);
-            this.updateStatus(this.colPlayer, this.rowPlayer);
-        }
-    };
 
     private updateStatus(emitter: AtomPlayer, receptor: AtomPlayer): void {
         switch (emitter.status) {

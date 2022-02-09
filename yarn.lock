@@ -5979,6 +5979,11 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
+side-effect-manager@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/side-effect-manager/-/side-effect-manager-0.1.5.tgz#d9b205e4317b60f90876f6ad498a1ac7e038c7d7"
+  integrity sha512-aAEXMS+9qW7rY2cwq4S6UjW3IBO/ZLWRI0sH1oGJ1eDE7YBFR1TW950qffnpx/0hByusAOVbu2zjThk9Vcjs+Q==
+
 signal-exit@^3.0.0, signal-exit@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
