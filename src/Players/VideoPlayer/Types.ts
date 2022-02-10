@@ -1,6 +1,6 @@
-import { VideoJsPlayer } from "video.js";
+import type { VideoJsPlayer } from "video.js";
+import type { AtomPlayerConfig } from "../AtomPlayer";
 
-export interface VideoPlayerConfig {
+export interface VideoPlayerConfig extends AtomPlayerConfig {
     video: VideoJsPlayer;
-    name?: string;
 }

@@ -1,12 +1,17 @@
 import EventEmitter from "eventemitter3";
+import { SideEffectManager } from "side-effect-manager";
 import { SyncPlayerStatus } from "../Types";
 import { isPlaybackRateEqual, normalizePlaybackRate } from "../utils/playbackrate";
+
+export interface AtomPlayerConfig {
+    name?: string;
+}
 
 export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     public readonly name?: string;
     private readonly loadInit: Promise<void>;
 
-    protected constructor(config?: { name?: string }) {
+    protected constructor(config?: AtomPlayerConfig) {
         super();
         this.name = config?.name;
         this.loadInit = this.init();
@@ -170,7 +175,9 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         }
     }
 
-    public abstract destroy(): void;
+    public destroy(): void {
+        this._sideEffect.flushAll();
+    }
 
     protected abstract readyImpl(silently?: boolean): Promise<void>;
     protected abstract playImpl(): Promise<void>;
@@ -184,6 +191,8 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 
     protected ignoreSetStatus: boolean = false;
+
+    protected _sideEffect = new SideEffectManager();
 
     private _status: SyncPlayerStatus = SyncPlayerStatus.Ready;
 
