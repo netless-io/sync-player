@@ -210,7 +210,7 @@ export class ClusterPlayer extends AtomPlayer {
                 }
 
                 if (
-                    receptor.status !== SyncPlayerStatus.Ended ||
+                    receptor.status !== SyncPlayerStatus.Ended &&
                     emitter.currentTime < receptor.duration
                 ) {
                     await receptor.play();

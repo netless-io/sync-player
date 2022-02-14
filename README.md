@@ -70,7 +70,7 @@ syncPlayer.status
 syncPlayer.playbackRate
 ```
 
-## Common scenes
+## Basic Usage
 
 ### Monitor state changes
 
@@ -94,4 +94,22 @@ syncPlayer.on("timeupdate", () => {
 syncPlayer.on("ratechange", () => {
   const currentTime = syncPlayer.playbackRate;
 });
+```
+
+## Offset
+
+You may add a time offset before any `AtomPlayer`:
+
+```ts
+const video = videojs("#video1")
+const videoPlayer = new VideoPlayer({ video, name: "video1" });
+
+// wait 3s before actually playing
+const offsetPlayer = new OffsetPlayer({ offset: 3000, player: videoPlayer })
+
+// add css to hide the video element
+video.toggleClass("hidden", !player.visible)
+offsetPlayer.on("visibilitychange", () => {
+    video.toggleClass("hidden", !player.visible)
+})
 ```

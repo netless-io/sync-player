@@ -1,5 +1,10 @@
 .video {
     background-color: #111;
+    transition: opacity 0.4s;
+}
+
+.video-hidden {
+    opacity: 0;
 }
 
 .sync-player-controller {
