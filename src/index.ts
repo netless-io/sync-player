@@ -2,7 +2,13 @@ import { AtomPlayer } from "./Players/AtomPlayer";
 import { ClusterPlayer } from "./Players/ClusterPlayer";
 
 export { VideoPlayer } from "./Players/VideoPlayer";
+export type { VideoPlayerConfig } from "./Players/VideoPlayer";
+
 export { WhiteboardPlayer } from "./Players/WhiteboardPlayer";
+export type { WhiteboardPlayerConfig } from "./Players/WhiteboardPlayer";
+
+export { OffsetPlayer } from "./Players/OffsetPlayer";
+export type { OffsetPlayerConfig } from "./Players/OffsetPlayer";
 
 export { SyncPlayerStatus } from "./Types";
 

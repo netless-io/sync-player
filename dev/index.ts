@@ -7,7 +7,10 @@ import { genPlayers } from "./utils/genPlayers";
 
 async function main(): Promise<void> {
     const players = await genPlayers([
-        "video1.mp4",
+        {
+            offset: 3000,
+            videoSRC: "video1.mp4",
+        },
         "video3.mp4",
         {
             appId: "",

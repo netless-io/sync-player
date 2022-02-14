@@ -11,11 +11,31 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     public readonly name?: string;
     private readonly loadInit: Promise<void>;
 
+    /** wait `offset` ms before start playing */
+    public get offset(): number {
+        return this._offset;
+    }
+
+    protected _offset: number = 0;
+
     protected constructor(config?: AtomPlayerConfig) {
         super();
         this.name = config?.name;
         this.loadInit = this.init();
     }
+
+    public get visible(): boolean {
+        return this._visible;
+    }
+
+    public set visible(value: boolean) {
+        if (this._visible !== value) {
+            this._visible = value;
+            this.emit("visibilitychange");
+        }
+    }
+
+    protected _visible: boolean = true;
 
     public get isReady(): boolean {
         return this._initStatus === AtomPlayerInitStatus.Ready;
@@ -44,7 +64,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
     public set currentTime(ms: number) {
         ms = Math.floor(ms);
-        if (this._status !== SyncPlayerStatus.Ended && this._currentTime !== ms) {
+        if (this._currentTime !== ms) {
             this._currentTime = ms;
             this.emit("timeupdate");
         }
@@ -75,14 +95,20 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         }
     }
 
+    // @todo 等待播放器播放完成
+    // private _pPlaying: Promise<void>
+
     public async play(): Promise<void> {
         if (!this.isReady) {
             this.status = SyncPlayerStatus.Buffering;
             await this.loadInit;
         }
 
-        if (this._status !== SyncPlayerStatus.Playing && this._status !== SyncPlayerStatus.Ended) {
+        if (this._status !== SyncPlayerStatus.Playing) {
             try {
+                if (this._currentTime >= this._duration) {
+                    await this.seekImpl(0);
+                }
                 await this.playImpl();
             } catch (e) {
                 if (
@@ -225,7 +251,13 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
     }
 }
 
-export type AtomPlayerEvents = "status" | "timeupdate" | "durationchange" | "ratechange" | "ready";
+export type AtomPlayerEvents =
+    | "status"
+    | "timeupdate"
+    | "durationchange"
+    | "ratechange"
+    | "visibilitychange"
+    | "ready";
 
 export declare interface AtomPlayer {
     addListener<U extends AtomPlayerEvents>(event: U, listener: () => void): this;
