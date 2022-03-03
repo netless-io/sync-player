@@ -95,6 +95,10 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
         }
     }
 
+    public setPlaybackRate(value: number): void {
+        this.playbackRate = value;
+    }
+
     // @todo 等待播放器播放完成
     // private _pPlaying: Promise<void>
 

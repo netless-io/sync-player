@@ -6,105 +6,21 @@ Play multiple videos at the same time with state synchronization.
 
 ## Usage
 
+### Basic
+
 ```ts
 import videojs from "video.js";
 import { VideoPlayer, SyncPlayer, OffsetPlayer } from "@netless/sync-player";
 
-const video1 = videojs("#video1")
-const player1 = new VideoPlayer({ video: video1, name: "video1" });
-
-const video2 = videojs("#video2")
-const player2 = new OffsetPlayer({ offset: 1000, player: new VideoPlayer({ video: video2, name: "video2" }) });
-
-video2.toggleClass("video-hidden", !player2.visible)
-player2.on("visibilitychange", () => {
-    video2.toggleClass("video-hidden", !player2.visible);
-});
+const player1 = new VideoPlayer({ video: videojs("#video1"), name: "video1" });
+const player2 = new VideoPlayer({ video: videojs("#video2"), name: "video2" });
 
 const syncPlayer = new SyncPlayer({ players: [player1, player2] });
 
 syncPlayer.play();
 ```
 
-## API
-
-### play
-
-```ts
-syncPlayer.play();
-```
-
-### pause
-
-```ts
-syncPlayer.pause();
-```
-
-### seek
-
-```ts
-// unit: ms
-syncPlayer.seek(1000);
-```
-
-### duration
-
-```ts
-// unit: ms
-// returns the longest timestamp
-syncPlayer.duration
-```
-
-
-### currentTime
-
-```ts
-// unit: ms
-syncPlayer.currentTime
-```
-
-
-### status
-
-```ts
-// Ready | Pause | Buffering | Playing | Ended
-syncPlayer.status
-```
-
-## playbackRate
-
-```ts
-// link: https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/WebAudio_playbackRate_explained
-syncPlayer.playbackRate
-```
-
-## Basic Usage
-
-### Monitor state changes
-
-```ts
-syncPlayer.on("status", () => {
-  const currentStatus = syncPlayer.status;
-});
-```
-
-### Monitor playback progress
-
-```ts
-syncPlayer.on("timeupdate", () => {
-  const currentTime = syncPlayer.currentTime;
-});
-```
-
-### Monitor playback rate
-
-```ts
-syncPlayer.on("ratechange", () => {
-  const currentTime = syncPlayer.playbackRate;
-});
-```
-
-## Offset
+### Offset
 
 You may add a time offset before any `AtomPlayer`:
 
@@ -120,4 +36,83 @@ video.toggleClass("hidden", !player.visible)
 offsetPlayer.on("visibilitychange", () => {
     video.toggleClass("hidden", !player.visible)
 })
+```
+
+
+## API
+
+### play
+
+```ts
+syncPlayer.play();
+```
+
+### pause
+
+```ts
+syncPlayer.pause();
+```
+
+### duration
+
+```ts
+// unit: ms
+// returns the longest timestamp
+console.log(syncPlayer.duration);
+
+syncPlayer.on("durationchange", () => {
+  console.log(syncPlayer.duration);
+});
+```
+
+
+### currentTime
+
+```ts
+// unit: ms
+console.log(syncPlayer.currentTime);
+
+syncPlayer.seek(1000);
+
+syncPlayer.on("timeupdate", () => {
+  console.log(syncPlayer.currentTime);
+});
+```
+
+
+### status
+
+```ts
+// Ready | Pause | Buffering | Playing | Ended
+console.log(syncPlayer.status);
+
+syncPlayer.on("status", () => {
+  console.log(syncPlayer.status);
+});
+```
+
+
+### playbackRate
+
+<https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/WebAudio_playbackRate_explained>
+
+```ts
+console.log(syncPlayer.playbackRate);
+syncPlayer.setPlaybackRate(0.5);
+
+syncPlayer.on("ratechange", () => {
+  console.log(syncPlayer.playbackRate);
+});
+```
+
+### visibility
+
+A hint for visibility changes for player with offset
+
+```ts
+console.log(syncPlayer.visible)
+
+syncPlayer.on("visibilitychange", () => {
+  console.log(syncPlayer.visible)
+});
 ```
