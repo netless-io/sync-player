@@ -178,7 +178,7 @@ export class OffsetPlayer extends AtomPlayer {
     }
 
     protected setPlaybackRateImpl(value: number): void {
-        this.player.playbackRate = value;
-        this.timer.playbackRate = value;
+        this.player.setPlaybackRate(value);
+        this.timer.setPlaybackRate(value);
     }
 }

@@ -139,8 +139,8 @@ export class ClusterPlayer extends AtomPlayer {
     }
 
     protected setPlaybackRateImpl(value: number): void {
-        this.rowPlayer.playbackRate = value;
-        this.colPlayer.playbackRate = value;
+        this.rowPlayer.setPlaybackRate(value);
+        this.colPlayer.setPlaybackRate(value);
     }
 
     private updateStatus(emitter: AtomPlayer, receptor: AtomPlayer): void {
