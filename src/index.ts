@@ -10,6 +10,9 @@ export type { WhiteboardPlayerConfig } from "./Players/WhiteboardPlayer";
 export { OffsetPlayer } from "./Players/OffsetPlayer";
 export type { OffsetPlayerConfig } from "./Players/OffsetPlayer";
 
+export { SelectionPlayer } from "./Players/SelectionPlayer";
+export type { SelectionPlayerConfig, SelectionPlayerSelection } from "./Players/SelectionPlayer";
+
 export { SyncPlayerStatus } from "./Types";
 
 export interface SyncPlayerConfig {
