@@ -1,5 +1,6 @@
 import videoJS, { VideoJsPlayer } from "video.js";
 import { Player, WhiteWebSdk } from "white-web-sdk";
+import { renderTime } from "./video-controller";
 
 export type UpdateElSize = (width: number, height: number) => void;
 
@@ -15,18 +16,34 @@ export function genVideo(videoSRC: string): VideoItem {
     $video.width = 240;
     $video.height = 180;
 
+    const $container = document.createElement("div");
+    $container.className = "player-container";
+
+    const $currentTime = document.createElement("div");
+    $currentTime.className = "player-container-current-time";
+    $currentTime.textContent = renderTime(0);
+
     const $source = document.createElement("source");
     $source.src = videoSRC;
 
     $video.appendChild($source);
-    document.body.appendChild($video);
+
+    $container.appendChild($video);
+    $container.appendChild($currentTime);
+    document.body.appendChild($container);
+
+    const video = videoJS($video);
+
+    video.on("timeupdate", () => {
+        $currentTime.textContent = renderTime((video.currentTime() || 0) * 1000);
+    });
 
     return {
-        updateSize: (width, height) => {
+        updateSize: (width: number, height: number): void => {
             $video.width = width;
             $video.height = height;
         },
-        video: videoJS($video),
+        video,
     };
 }
 
@@ -51,10 +68,20 @@ export interface WhiteboardConfig {
 
 export async function genWhiteboard(config: WhiteboardConfig): Promise<WhiteboardItem> {
     const whiteboardEl = document.createElement("div");
-    whiteboardEl.style.width = `240px`;
-    whiteboardEl.style.height = `180px`;
+    whiteboardEl.style.width = "240px";
+    whiteboardEl.style.height = "180px";
     whiteboardEl.style.outline = "1px solid #ddd";
-    document.body.appendChild(whiteboardEl);
+
+    const $container = document.createElement("div");
+    $container.className = "player-container";
+
+    const $currentTime = document.createElement("div");
+    $currentTime.className = "player-container-current-time";
+    $currentTime.textContent = renderTime(0);
+
+    $container.appendChild(whiteboardEl);
+    $container.appendChild($currentTime);
+    document.body.appendChild($container);
 
     const sdk = new WhiteWebSdk({
         appIdentifier: config.appId,
@@ -70,10 +97,13 @@ export async function genWhiteboard(config: WhiteboardConfig): Promise<Whiteboar
     });
 
     room.bindHtmlElement(whiteboardEl);
-    (window as any).room = room;
+
+    room.callbacks.on("onProgressTimeChanged", (currentTime: number) => {
+        $currentTime.textContent = renderTime(currentTime || 0);
+    });
 
     return {
-        updateSize: (width, height) => {
+        updateSize: (width: number, height: number): void => {
             whiteboardEl.style.width = `${width}px`;
             whiteboardEl.style.height = `${height}px`;
         },

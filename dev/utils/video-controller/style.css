@@ -1,3 +1,11 @@
+.player-container {
+    position: relative;
+}
+
+.player-container-current-time {
+    text-align: center;
+}
+
 .video {
     background-color: #111;
     transition: opacity 0.4s;
