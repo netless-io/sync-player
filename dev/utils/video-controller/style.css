@@ -4,7 +4,20 @@
 }
 
 .video-hidden {
-    opacity: 0;
+    position: relative;
+}
+.video-hidden::after {
+    content: "Video Is Hidden";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    background: #b9b9b9;
 }
 
 .sync-player-controller {

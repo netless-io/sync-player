@@ -25,19 +25,58 @@ syncPlayer.play();
 You may add a time offset before any `AtomPlayer`:
 
 ```ts
-const video = videojs("#video1")
+const video = videojs("#video1");
 const videoPlayer = new VideoPlayer({ video, name: "video1" });
 
 // wait 3s before actually playing
-const offsetPlayer = new OffsetPlayer({ offset: 3000, player: videoPlayer })
+const offsetPlayer = new OffsetPlayer({ offset: 3000, player: videoPlayer });
 
 // add css to hide the video element
-video.toggleClass("hidden", !player.visible)
+video.toggleClass("hidden", !player.visible);
 offsetPlayer.on("visibilitychange", () => {
-    video.toggleClass("hidden", !player.visible)
-})
+    video.toggleClass("hidden", !player.visible);
+});
 ```
 
+### Selection Player
+
+You may trim any `AtomPlayer` to selected parts by providing a selection list.
+
+```ts
+const video = videojs("#video1");
+const videoPlayer = new VideoPlayer({ video, name: "video1" });
+console.log(videoPlayer.duration); // let's say it's 15000
+
+const selectionPlayer = new SelectionPlayer({
+    player: videoPlayer,
+    selectionList: [
+        { start: 0, end: 1000 },
+        { start: 3000, end: 9000 },
+    ],
+});
+console.log(selectionPlayer.duration); // 7000
+```
+
+### Sync With Netless Whiteboard
+
+Sync videos with Netless Whiteboard Replay.
+
+```js
+import videojs from "video.js";
+import { VideoPlayer, WhiteboardPlayer, SyncPlayer, OffsetPlayer } from "@netless/sync-player";
+
+const videoPlayer1 = new VideoPlayer({ video: videojs("#video1"), name: "video1" });
+const videoPlayer2 = new VideoPlayer({ video: videojs("#video2"), name: "video2" });
+
+const sdk = new WhiteWebSdk({ ... });
+const room = await sdk.replayRoom({ ... });
+room.bindHtmlElement(el);
+const whiteboardPlayer = new WhiteboardPlayer({ player: room });
+
+const syncPlayer = new SyncPlayer({ players: [videoPlayer1, videoPlayer2, whiteboardPlayer] });
+
+syncPlayer.play();
+```
 
 ## API
 
@@ -61,10 +100,9 @@ syncPlayer.pause();
 console.log(syncPlayer.duration);
 
 syncPlayer.on("durationchange", () => {
-  console.log(syncPlayer.duration);
+    console.log(syncPlayer.duration);
 });
 ```
-
 
 ### currentTime
 
@@ -75,10 +113,9 @@ console.log(syncPlayer.currentTime);
 syncPlayer.seek(1000);
 
 syncPlayer.on("timeupdate", () => {
-  console.log(syncPlayer.currentTime);
+    console.log(syncPlayer.currentTime);
 });
 ```
-
 
 ### status
 
@@ -87,10 +124,9 @@ syncPlayer.on("timeupdate", () => {
 console.log(syncPlayer.status);
 
 syncPlayer.on("status", () => {
-  console.log(syncPlayer.status);
+    console.log(syncPlayer.status);
 });
 ```
-
 
 ### playbackRate
 
@@ -101,7 +137,7 @@ console.log(syncPlayer.playbackRate);
 syncPlayer.setPlaybackRate(0.5);
 
 syncPlayer.on("ratechange", () => {
-  console.log(syncPlayer.playbackRate);
+    console.log(syncPlayer.playbackRate);
 });
 ```
 
@@ -110,9 +146,9 @@ syncPlayer.on("ratechange", () => {
 A hint for visibility changes for player with offset
 
 ```ts
-console.log(syncPlayer.visible)
+console.log(syncPlayer.visible);
 
 syncPlayer.on("visibilitychange", () => {
-  console.log(syncPlayer.visible)
+    console.log(syncPlayer.visible);
 });
 ```
