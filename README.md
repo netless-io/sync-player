@@ -38,6 +38,27 @@ offsetPlayer.on("visibilitychange", () => {
 })
 ```
 
+### Sync With Netless Whiteboard
+
+Sync videos with Netless Whiteboard Replay.
+
+```js
+import videojs from "video.js";
+import { VideoPlayer, WhiteboardPlayer, SyncPlayer, OffsetPlayer } from "@netless/sync-player";
+
+const videoPlayer1 = new VideoPlayer({ video: videojs("#video1"), name: "video1" });
+const videoPlayer2 = new VideoPlayer({ video: videojs("#video2"), name: "video2" });
+
+const sdk = new WhiteWebSdk({ ... });
+const room = await sdk.replayRoom({ ... });
+room.bindHtmlElement(el);
+const whiteboardPlayer = new WhiteboardPlayer({ player: room });
+
+const syncPlayer = new SyncPlayer({ players: [videoPlayer1, videoPlayer2, whiteboardPlayer] });
+
+syncPlayer.play();
+```
+
 
 ## API
 
