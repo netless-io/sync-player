@@ -19,6 +19,7 @@ async function main(): Promise<void> {
             beginTime: 1652689484178,
             endTime: 1652689525046,
             roomUUID: "a0ec99b0d4f111eca5875ff80c78ea42",
+            // this test room token is intentionally put here
             roomToken:
                 "NETLESSROOM_YWs9eTBJOWsxeC1IVVo4VGh0NyZub25jZT0xNjUyNjg5NDc5Nzg5MDAmcm9sZT0wJnNpZz00MTQ4NjJlMDIzMzA3ZjJmYjhkZjMxYjVlNzU0MGQxMTllNGYwNDNlMmUxZmFlYzJjYWYzOWYxNjVkYTNlZmY0JnV1aWQ9YTBlYzk5YjBkNGYxMTFlY2E1ODc1ZmY4MGM3OGVhNDI",
         },
@@ -53,9 +54,9 @@ async function main(): Promise<void> {
     videoPlayers[0] = new SelectionPlayer({
         player: videoPlayers[0],
         selectionList: [
-            { start: 0, end: 1000 },
-            { start: 4000, end: 9000 },
+            { start: 0, end: 4000 },
             { start: 6000, end: 17000 },
+            { start: 20000, end: 27000 },
         ],
     });
 

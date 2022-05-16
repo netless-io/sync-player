@@ -2,7 +2,7 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     plugins: ["@netless", "prettier", "@typescript-eslint"],
     parserOptions: {
-        project: "./tsconfig.json",
+        project: "./tsconfig.lint.json",
         sourceType: "module",
     },
     extends: [
