@@ -54,9 +54,9 @@ async function main(): Promise<void> {
     videoPlayers[0] = new SelectionPlayer({
         player: videoPlayers[0],
         selectionList: [
-            { start: 0, end: 4000 },
-            { start: 6000, end: 17000 },
-            { start: 20000, end: 27000 },
+            { start: 0, duration: 4000 },
+            { start: 6000, duration: 10000 },
+            { start: 8000, duration: 5000 },
         ],
     });
 

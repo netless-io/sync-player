@@ -2,7 +2,7 @@ import { AtomPlayer, AtomPlayerConfig, AtomPlayerEvents } from "../AtomPlayer";
 
 export interface SelectionPlayerSelection {
     start: number;
-    end: number;
+    duration: number;
 }
 
 export interface SelectionPlayerConfig extends AtomPlayerConfig {
@@ -10,10 +10,14 @@ export interface SelectionPlayerConfig extends AtomPlayerConfig {
     selectionList: SelectionPlayerSelection[];
 }
 
+interface SelectionItem extends SelectionPlayerSelection {
+    /** Start position of resulted timeline */
+    rStart: number;
+}
+
 export class SelectionPlayer extends AtomPlayer {
     private readonly player: AtomPlayer;
-    private selectionList: SelectionPlayerSelection[];
-    private compressedTimeList: SelectionPlayerSelection[];
+    private selectionItems: SelectionItem[];
 
     public constructor({ player, selectionList, ...config }: SelectionPlayerConfig) {
         super(config);
@@ -22,15 +26,16 @@ export class SelectionPlayer extends AtomPlayer {
         }
         this.player = player;
 
-        selectionList = sanitizeSelectionList(selectionList);
+        const selectionItems = sanitizeSelectionList(selectionList);
 
-        this.selectionList = selectionList.filter(s => s.end <= this.player.duration);
-        this.compressedTimeList = compressTimeList(this.selectionList);
+        this.selectionItems = selectionItems.filter(
+            s => s.start + s.duration <= this.player.duration,
+        );
 
         this.status = this.player.status;
         this.playbackRate = this.player.playbackRate;
         this.duration = this.calcDuration();
-        this.currentTime = this.calcCurrentTime();
+        this.currentTime = this.syncCurrentTime();
 
         const syncAtomProps = (
             player: AtomPlayer,
@@ -50,13 +55,14 @@ export class SelectionPlayer extends AtomPlayer {
             this.playbackRate = this.player.playbackRate;
         });
         syncAtomProps(this.player, "timeupdate", () => {
-            this.currentTime = this.calcCurrentTime();
+            this.currentTime = this.syncCurrentTime();
         });
         syncAtomProps(this.player, "durationchange", () => {
-            this.selectionList = selectionList.filter(s => s.end <= this.player.duration);
-            this.compressedTimeList = compressTimeList(this.selectionList);
+            this.selectionItems = selectionItems.filter(
+                s => s.start + s.duration <= this.player.duration,
+            );
             this.duration = this.calcDuration();
-            this.currentTime = this.calcCurrentTime();
+            this.currentTime = this.syncCurrentTime();
         });
     }
 
@@ -74,9 +80,9 @@ export class SelectionPlayer extends AtomPlayer {
 
     protected async stopImpl(): Promise<void> {
         await this.player.stop();
-        const lastS = this.selectionList[this.selectionList.length - 1];
-        if (lastS) {
-            await this.player.seek(lastS.end);
+        const lastItem = this.selectionItems[this.selectionItems.length - 1];
+        if (lastItem) {
+            await this.player.seek(lastItem.start + lastItem.duration);
         }
     }
 
@@ -85,92 +91,73 @@ export class SelectionPlayer extends AtomPlayer {
     }
 
     protected async seekImpl(ms: number): Promise<void> {
-        if (this.compressedTimeList.length <= 0) {
+        if (this.selectionItems.length <= 0) {
             return this.player.seek(ms);
         }
 
-        for (let i = 0; i < this.compressedTimeList.length; i++) {
-            const t = this.compressedTimeList[i];
-            if (ms >= t.start && ms <= t.end) {
-                return this.player.seek(ms - t.start + this.selectionList[i].start);
-            }
-        }
-
-        if (ms < this.compressedTimeList[0].start) {
+        if (ms <= 0) {
             return this.player.seek(0);
         }
 
-        if (ms > this.compressedTimeList[this.compressedTimeList.length - 1].end) {
+        if (ms >= this.duration) {
             return this.player.seek(this.player.duration);
+        }
+
+        for (let i = 0; i < this.selectionItems.length; i++) {
+            const item = this.selectionItems[i];
+            if (ms >= item.rStart) {
+                return this.player.seek(ms - item.rStart + item.start);
+            }
         }
     }
 
-    private calcCurrentTime(): number {
-        const selectionList = this.selectionList;
-        const compressedTimeList = this.compressedTimeList;
+    private syncCurrentTime(): number {
         const currentTime = this.player.currentTime;
 
-        if (selectionList.length <= 0) {
+        if (this.selectionItems.length <= 0) {
             return currentTime;
         }
 
-        for (let i = 0; i < selectionList.length; i++) {
-            const s = selectionList[i];
-            if (currentTime >= s.start && currentTime <= s.end) {
-                return currentTime - s.start + compressedTimeList[i].start;
-            }
-            const nextS = selectionList[i + 1];
-            if (nextS) {
-                if (currentTime >= s.end && currentTime <= nextS.start) {
-                    this.player.seek(nextS.start);
-                    return compressedTimeList[i + 1].start;
+        for (let i = 0; i < this.selectionItems.length; i++) {
+            const item = this.selectionItems[i];
+            if (currentTime <= item.start + item.duration) {
+                if (currentTime < item.start) {
+                    this.player.seek(item.start);
+                    return item.rStart;
                 }
-            } else {
-                this.stop();
-                return compressedTimeList[compressedTimeList.length - 1].end;
+                return currentTime - item.start + item.rStart;
             }
         }
 
-        this.player.seek(selectionList[0].start);
-        return compressedTimeList[0].start;
+        this.stop();
+        return this.duration;
     }
 
     private calcDuration(): number {
-        return this.compressedTimeList.length > 0
-            ? this.compressedTimeList[this.compressedTimeList.length - 1].end
-            : this.player.duration;
+        const lastItem = this.selectionItems[this.selectionItems.length - 1];
+        return lastItem ? lastItem.rStart + lastItem.duration : this.player.duration;
     }
 }
 
-function sanitizeSelectionList(
-    selectionList: SelectionPlayerSelection[],
-): SelectionPlayerSelection[] {
-    selectionList.sort((a, b) => a.start - b.start);
-    const result: SelectionPlayerSelection[] = [];
+function sanitizeSelectionList(selectionList: SelectionPlayerSelection[]): SelectionItem[] {
+    selectionList = selectionList.sort((a, b) => a.start - b.start);
+    const result: SelectionItem[] = [];
+    let lastItem: SelectionItem | null = null;
     for (let i = 0; i < selectionList.length; i++) {
-        const s = selectionList[i];
-        if (s.start < s.end) {
-            const lastS = result[result.length - 1];
-            if (lastS && s.start <= lastS.end) {
-                lastS.end = s.end;
-            } else {
-                result.push(s);
-            }
-        }
-    }
-    return result;
-}
-
-function compressTimeList(selectionList: SelectionPlayerSelection[]): SelectionPlayerSelection[] {
-    const result: SelectionPlayerSelection[] = [];
-    for (let i = 0; i < selectionList.length; i++) {
-        const s = selectionList[i];
-        const lastS = result[result.length - 1];
-        if (lastS) {
-            result.push({ start: lastS.end, end: s.end - s.start + lastS.end });
+        const item = selectionList[i];
+        if (lastItem && item.start <= lastItem.start + lastItem.duration) {
+            lastItem.duration =
+                Math.max(lastItem.start + lastItem.duration, item.start + item.duration) -
+                lastItem.start;
         } else {
-            result.push(s);
+            lastItem = {
+                start: item.start,
+                duration: item.duration,
+                rStart: lastItem ? lastItem.rStart + lastItem.duration : 0,
+            };
+            result.push(lastItem);
         }
     }
+
     return result;
 }
