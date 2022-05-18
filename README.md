@@ -1,10 +1,25 @@
 ## SyncPlayer
 
-Play multiple videos at the same time with state synchronization.
+Plays multiple media(videos or whiteboards) at the same time with synchronized progress and speed. Stops when the longest media ended.
 
-> If one of the videos has finished playing, we will let the other videos continue to play. We don't fire the Ended event until all the videos have finished playing
+## Overview
+
+-   `AtomPlayer`: Abstract class for anything that is playable.
+    -   `VideoPlayer`: For `videojs` supported media.
+    -   `WhiteboardPlayer`: For [Netless Whiteboard](https://developer.netless.link/javascript-en/home/replay) replay room.
+    -   `OffsetPlayer`: Add blank offset before an `AtomPlayer`.
+    -   `SelectionPlayer`: Cherry-pick segments of an `AtomPlayer`.
+    -   `SyncPlayer`: Play groups of `AtomPlayer`s at the same time with synchronized progress and speed.
+
+## Install
+
+```
+npm add @netless/sync-player
+```
 
 ## Usage
+
+You may clone this repo and run the [dev example](https://github.com/netless-io/sync-player/blob/main/dev/index.ts).
 
 ### Basic
 
@@ -50,8 +65,8 @@ console.log(videoPlayer.duration); // let's say it's 15000
 const selectionPlayer = new SelectionPlayer({
     player: videoPlayer,
     selectionList: [
-        { start: 0, end: 1000 },
-        { start: 3000, end: 9000 },
+        { start: 0, duration: 1000 },
+        { start: 3000, duration: 9000 },
     ],
 });
 console.log(selectionPlayer.duration); // 7000
@@ -92,11 +107,23 @@ syncPlayer.play();
 syncPlayer.pause();
 ```
 
-### duration
+### stop
 
 ```ts
-// unit: ms
-// returns the longest timestamp
+syncPlayer.stop();
+```
+
+### seek
+
+```ts
+syncPlayer.seek(200);
+```
+
+### duration
+
+Duration(in millisecond) of the longest media.
+
+```ts
 console.log(syncPlayer.duration);
 
 syncPlayer.on("durationchange", () => {
@@ -106,8 +133,9 @@ syncPlayer.on("durationchange", () => {
 
 ### currentTime
 
+Player progress time(in millisecond).
+
 ```ts
-// unit: ms
 console.log(syncPlayer.currentTime);
 
 syncPlayer.seek(1000);
@@ -118,6 +146,14 @@ syncPlayer.on("timeupdate", () => {
 ```
 
 ### status
+
+Player status.
+
+-   `Pause` Player paused by user invoking `player.pause()`.
+-   `Ready` Player paused by controller.
+-   `Buffering` Player is buffering.
+-   `Playing` Player is playing.
+-   `Ended` Player ends.
 
 ```ts
 // Ready | Pause | Buffering | Playing | Ended
@@ -130,7 +166,7 @@ syncPlayer.on("status", () => {
 
 ### playbackRate
 
-<https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/WebAudio_playbackRate_explained>
+`0~1`. Playback speed, or rate, of a player.
 
 ```ts
 console.log(syncPlayer.playbackRate);
@@ -141,9 +177,9 @@ syncPlayer.on("ratechange", () => {
 });
 ```
 
-### visibility
+### visible
 
-A hint for visibility changes for player with offset
+A hint for visibility changes for `OffsetPlayer`. `player.visible` is `false` when `currentTime` is within the offset.
 
 ```ts
 console.log(syncPlayer.visible);
