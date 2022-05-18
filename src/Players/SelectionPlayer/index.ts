@@ -28,9 +28,7 @@ export class SelectionPlayer extends AtomPlayer {
 
         const selectionItems = sanitizeSelectionList(selectionList);
 
-        this.selectionItems = selectionItems.filter(
-            s => s.start + s.duration <= this.player.duration,
-        );
+        this.selectionItems = this.sliceSelectionItems(selectionItems);
 
         this.status = this.player.status;
         this.playbackRate = this.player.playbackRate;
@@ -58,9 +56,7 @@ export class SelectionPlayer extends AtomPlayer {
             this.currentTime = this.syncCurrentTime();
         });
         syncAtomProps(this.player, "durationchange", () => {
-            this.selectionItems = selectionItems.filter(
-                s => s.start + s.duration <= this.player.duration,
-            );
+            this.selectionItems = this.sliceSelectionItems(selectionItems);
             this.duration = this.calcDuration();
             this.currentTime = this.syncCurrentTime();
         });
@@ -136,6 +132,20 @@ export class SelectionPlayer extends AtomPlayer {
     private calcDuration(): number {
         const lastItem = this.selectionItems[this.selectionItems.length - 1];
         return lastItem ? lastItem.rStart + lastItem.duration : this.player.duration;
+    }
+
+    private sliceSelectionItems(selectionItems: SelectionItem[]): SelectionItem[] {
+        const result: SelectionItem[] = [];
+        for (let i = 0; i < selectionItems.length; i++) {
+            const item = selectionItems[i];
+            if (item.start + item.duration <= this.player.duration) {
+                result.push(item);
+            } else {
+                result.push({ ...item, duration: this.player.duration - item.start });
+                break;
+            }
+        }
+        return result;
     }
 }
 
