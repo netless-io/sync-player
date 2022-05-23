@@ -130,18 +130,24 @@ export class SelectionPlayer extends AtomPlayer {
     }
 
     private calcDuration(): number {
+        if (this.player.duration <= 0) {
+            return 0;
+        }
         const lastItem = this.selectionItems[this.selectionItems.length - 1];
         return lastItem ? lastItem.rStart + lastItem.duration : this.player.duration;
     }
 
     private sliceSelectionItems(selectionItems: SelectionItem[]): SelectionItem[] {
+        if (this.player.duration <= 0) {
+            return [];
+        }
         const result: SelectionItem[] = [];
         for (let i = 0; i < selectionItems.length; i++) {
             const item = selectionItems[i];
-            if (item.start + item.duration <= this.player.duration) {
+            if (item.rStart + item.duration <= this.player.duration) {
                 result.push(item);
             } else {
-                result.push({ ...item, duration: this.player.duration - item.start });
+                result.push({ ...item, duration: this.player.duration - item.rStart });
                 break;
             }
         }

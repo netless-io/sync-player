@@ -59,13 +59,17 @@ export class SafariAtomPlayer extends AtomPlayer {
             this.status = SyncPlayerStatus.Ended;
         });
 
-        addVideoListener("timeupdate", () => {
+        const setCurrentTime = (): void => {
             this.currentTime = (this.video.currentTime() || 0) * 1000;
-        });
+        };
+        setCurrentTime();
+        addVideoListener("timeupdate", setCurrentTime);
 
-        addVideoListener("durationchange", () => {
+        const setDuration = (): void => {
             this.duration = (this.video.duration() || 0) * 1000;
-        });
+        };
+        setDuration();
+        addVideoListener("durationchange", setDuration);
 
         this.lastCurrentTime = this.currentTime;
 
