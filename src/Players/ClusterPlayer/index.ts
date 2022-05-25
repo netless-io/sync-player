@@ -234,7 +234,7 @@ export class ClusterPlayer extends AtomPlayer {
         }
 
         let frameDropCount = 0;
-        const ticket = setInterval(() => {
+        const ticket = setInterval(async () => {
             if (this.status !== SyncPlayerStatus.Playing) {
                 frameDropCount = 0;
             } else {
@@ -243,10 +243,11 @@ export class ClusterPlayer extends AtomPlayer {
                 if (frameDropCount >= 3) {
                     // handle frame drops
                     if (diff < 0) {
-                        this.rowPlayer.seek(this.colPlayer.currentTime);
+                        await this.rowPlayer.seek(this.colPlayer.currentTime);
                     } else {
-                        this.colPlayer.seek(this.rowPlayer.currentTime);
+                        await this.colPlayer.seek(this.rowPlayer.currentTime);
                     }
+                    frameDropCount = 0;
                 }
             }
         }, 2000);
