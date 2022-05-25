@@ -1,3 +1,4 @@
+import { get } from "mobx";
 import { SyncPlayerStatus } from "../../Types";
 import { isPlaybackRateEqual } from "../../utils/playbackrate";
 import { AtomPlayer, AtomPlayerConfig, AtomPlayerEvents } from "../AtomPlayer";
@@ -57,6 +58,11 @@ export class ClusterPlayer extends AtomPlayer {
             if (!this.ignoreSetStatus) {
                 this.syncSubPlayer(emitter, receptor);
                 this.updateStatus(emitter, receptor);
+                if (this.status === SyncPlayerStatus.Playing) {
+                    this.startFrameDropCheck();
+                } else {
+                    this.stopFrameDropCheck?.();
+                }
             }
         });
 
@@ -86,6 +92,7 @@ export class ClusterPlayer extends AtomPlayer {
 
     public destroy(): void {
         super.destroy();
+        this.stopFrameDropCheck?.();
         this.rowPlayer.destroy();
         this.colPlayer.destroy();
     }
@@ -214,18 +221,39 @@ export class ClusterPlayer extends AtomPlayer {
                     emitter.currentTime < receptor.duration
                 ) {
                     await receptor.play();
-                    // handle frame drops
-                    const diff = emitter.currentTime - receptor.currentTime;
-                    if (Math.abs(diff) >= 1000) {
-                        if (diff < 0) {
-                            await emitter.seek(receptor.currentTime);
-                        } else {
-                            await receptor.seek(emitter.currentTime);
-                        }
-                    }
                 }
                 break;
             }
         }
+    }
+
+    private stopFrameDropCheck?: () => void;
+    private startFrameDropCheck(): void {
+        if (this.stopFrameDropCheck) {
+            return;
+        }
+
+        let frameDropCount = 0;
+        const ticket = setInterval(() => {
+            if (this.status !== SyncPlayerStatus.Playing) {
+                frameDropCount = 0;
+            } else {
+                const diff = this.rowPlayer.currentTime - this.colPlayer.currentTime;
+                frameDropCount = Math.abs(diff) > 1000 ? frameDropCount + 1 : 0;
+                if (frameDropCount >= 3) {
+                    // handle frame drops
+                    if (diff < 0) {
+                        this.rowPlayer.seek(this.colPlayer.currentTime);
+                    } else {
+                        this.colPlayer.seek(this.rowPlayer.currentTime);
+                    }
+                }
+            }
+        }, 2000);
+
+        this.stopFrameDropCheck = (): void => {
+            this.stopFrameDropCheck = undefined;
+            clearInterval(ticket);
+        };
     }
 }
