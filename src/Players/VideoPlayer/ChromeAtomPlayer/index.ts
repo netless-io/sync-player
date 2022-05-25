@@ -54,6 +54,12 @@ export class ChromeAtomPlayer extends AtomPlayer {
             },
         );
 
+        addVideoListener("error", () => {
+            if (this.status === SyncPlayerStatus.Playing) {
+                this.status = SyncPlayerStatus.Buffering;
+            }
+        });
+
         addVideoListener("ended", () => {
             this.status = SyncPlayerStatus.Ended;
         });
@@ -72,26 +78,50 @@ export class ChromeAtomPlayer extends AtomPlayer {
     }
 
     protected async readyImpl(): Promise<void> {
-        this.video.pause();
+        try {
+            this.video.pause();
+        } catch {
+            // ignore
+        }
     }
 
     protected async playImpl(): Promise<void> {
-        await this.video.play();
+        try {
+            await this.video.play();
+        } catch {
+            // ignore
+        }
     }
 
     protected async pauseImpl(): Promise<void> {
-        this.video.pause();
+        try {
+            this.video.pause();
+        } catch {
+            // ignore
+        }
     }
 
     protected async stopImpl(): Promise<void> {
-        this.video.currentTime(this.duration / 1000 - 0.5);
+        try {
+            this.video.currentTime(this.duration / 1000 - 0.5);
+        } catch {
+            // ignore
+        }
     }
 
     protected async seekImpl(ms: number): Promise<void> {
-        this.video.currentTime(ms / 1000);
+        try {
+            this.video.currentTime(ms / 1000);
+        } catch {
+            // ignore
+        }
     }
 
     protected setPlaybackRateImpl(value: number): void {
-        this.video.playbackRate(value);
+        try {
+            this.video.playbackRate(value);
+        } catch {
+            // ignore
+        }
     }
 }

@@ -45,6 +45,9 @@ export class WhiteboardPlayer extends AtomPlayer {
             return (): void => this.player.callbacks.off("onPhaseChanged", handler);
         });
 
+        this.duration = this.player.timeDuration || 0;
+        this.playbackRate = this.player.playbackSpeed;
+
         this._sideEffect.add(() => {
             const handler = (): void => {
                 this.duration = this.player.timeDuration || 0;
@@ -69,7 +72,11 @@ export class WhiteboardPlayer extends AtomPlayer {
             const disposerID = this._sideEffect.add(() => {
                 const handler = (phase: PlayerPhase): void => {
                     if (phase === PlayerPhase.Playing) {
-                        player.pause();
+                        try {
+                            player.pause();
+                        } catch {
+                            // ignore
+                        }
                     }
                     if (phase === PlayerPhase.Pause) {
                         this._sideEffect.flush(disposerID);
@@ -80,13 +87,14 @@ export class WhiteboardPlayer extends AtomPlayer {
                 return (): void => player.callbacks.off("onPhaseChanged", handler);
             });
         });
-        this.player.seekToProgressTime(0);
+
+        this._safeSeek(0);
 
         await p;
     }
 
     protected async readyImpl(): Promise<void> {
-        this.player.pause();
+        this._safePause();
     }
 
     protected async playImpl(): Promise<void> {
@@ -103,23 +111,51 @@ export class WhiteboardPlayer extends AtomPlayer {
                 return (): void => player.callbacks.off("onPhaseChanged", handler);
             });
         });
-        this.player.play();
+        this._safePlay();
         await p;
     }
 
     protected async pauseImpl(): Promise<void> {
-        this.player.pause();
+        this._safePause();
     }
 
     protected async stopImpl(): Promise<void> {
-        this.player.seekToProgressTime(this.duration);
+        this._safeSeek(this.duration);
     }
 
     protected async seekImpl(ms: number): Promise<void> {
-        this.player.seekToProgressTime(ms);
+        this._safeSeek(ms);
     }
 
     protected setPlaybackRateImpl(value: number): void {
-        this.player.playbackSpeed = value;
+        try {
+            this.player.playbackSpeed = value;
+        } catch {
+            // ignore
+        }
+    }
+
+    private _safeSeek(ms: number): void {
+        try {
+            this.player.seekToProgressTime(ms);
+        } catch {
+            // ignore
+        }
+    }
+
+    private _safePause(): void {
+        try {
+            this.player.pause();
+        } catch {
+            // ignore
+        }
+    }
+
+    private _safePlay(): void {
+        try {
+            this.player.play();
+        } catch {
+            // ignore
+        }
     }
 }
