@@ -55,6 +55,12 @@ export class SafariAtomPlayer extends AtomPlayer {
             },
         );
 
+        addVideoListener("error", () => {
+            if (this.status === SyncPlayerStatus.Playing) {
+                this.status = SyncPlayerStatus.Buffering;
+            }
+        });
+
         addVideoListener("ended", () => {
             this.status = SyncPlayerStatus.Ended;
         });

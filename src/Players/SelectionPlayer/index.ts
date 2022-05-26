@@ -99,7 +99,7 @@ export class SelectionPlayer extends AtomPlayer {
             return this.player.seek(this.player.duration);
         }
 
-        for (let i = 0; i < this.selectionItems.length; i++) {
+        for (let i = this.selectionItems.length - 1; i >= 0; i--) {
             const item = this.selectionItems[i];
             if (ms >= item.rStart) {
                 return this.player.seek(ms - item.rStart + item.start);
