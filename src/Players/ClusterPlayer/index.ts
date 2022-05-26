@@ -1,4 +1,3 @@
-import { get } from "mobx";
 import { SyncPlayerStatus } from "../../Types";
 import { isPlaybackRateEqual } from "../../utils/playbackrate";
 import { AtomPlayer, AtomPlayerConfig, AtomPlayerEvents } from "../AtomPlayer";
