@@ -57,7 +57,10 @@ export class ClusterPlayer extends AtomPlayer {
             if (!this.ignoreSetStatus) {
                 this.syncSubPlayer(emitter, receptor);
                 this.updateStatus(emitter, receptor);
-                if (this.status === SyncPlayerStatus.Playing) {
+                if (
+                    this.rowPlayer.status === SyncPlayerStatus.Playing &&
+                    this.colPlayer.status === SyncPlayerStatus.Playing
+                ) {
                     this.startFrameDropCheck();
                 } else {
                     this.stopFrameDropCheck?.();
@@ -125,19 +128,19 @@ export class ClusterPlayer extends AtomPlayer {
     }
 
     protected async readyImpl(silently?: boolean): Promise<void> {
-        await Promise.all([this.rowPlayer.ready(silently), this.colPlayer.ready(silently)]);
+        await this.invokeSubPlayers(player => player.ready(silently));
     }
 
     protected async playImpl(): Promise<void> {
-        await Promise.all([this.rowPlayer.play(), this.colPlayer.play()]);
+        await this.invokeSubPlayers(player => player.play());
     }
 
     protected async pauseImpl(): Promise<void> {
-        await Promise.all([this.rowPlayer.pause(), this.colPlayer.pause()]);
+        await this.invokeSubPlayers(player => player.pause());
     }
 
     protected async stopImpl(): Promise<void> {
-        await Promise.all([this.rowPlayer.stop(), this.colPlayer.stop()]);
+        await this.invokeSubPlayers(player => player.stop());
     }
 
     protected async seekImpl(ms: number): Promise<void> {
@@ -213,11 +216,9 @@ export class ClusterPlayer extends AtomPlayer {
             case SyncPlayerStatus.Playing: {
                 if (receptor.status === SyncPlayerStatus.Buffering) {
                     await emitter.ready();
-                }
-
-                if (
-                    receptor.status !== SyncPlayerStatus.Ended &&
-                    emitter.currentTime < receptor.duration
+                } else if (
+                    receptor.status === SyncPlayerStatus.Ready &&
+                    (receptor.duration <= 0 || emitter.currentTime < receptor.duration)
                 ) {
                     await receptor.play();
                 }
@@ -239,7 +240,7 @@ export class ClusterPlayer extends AtomPlayer {
             } else {
                 const diff = this.rowPlayer.currentTime - this.colPlayer.currentTime;
                 frameDropCount = Math.abs(diff) > 1000 ? frameDropCount + 1 : 0;
-                if (frameDropCount >= 3) {
+                if (frameDropCount >= 2) {
                     // handle frame drops
                     if (diff < 0) {
                         await this.rowPlayer.seek(this.colPlayer.currentTime);
@@ -255,5 +256,13 @@ export class ClusterPlayer extends AtomPlayer {
             this.stopFrameDropCheck = undefined;
             clearInterval(ticket);
         };
+    }
+
+    private async invokeSubPlayers(action: (player: AtomPlayer) => unknown): Promise<void> {
+        await Promise.all(
+            [this.rowPlayer, this.colPlayer]
+                .filter(player => player.status !== SyncPlayerStatus.Ended)
+                .map(action),
+        );
     }
 }
