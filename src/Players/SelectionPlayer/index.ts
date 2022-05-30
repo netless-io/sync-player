@@ -20,10 +20,7 @@ export class SelectionPlayer extends AtomPlayer {
     private selectionItems: SelectionItem[];
 
     public constructor({ player, selectionList, ...config }: SelectionPlayerConfig) {
-        super(config);
-        if (!config.name) {
-            config.name = player.name;
-        }
+        super({ ...config, name: config.name || `Selection<${player.name}>` });
         this.player = player;
 
         const selectionItems = sanitizeSelectionList(selectionList);

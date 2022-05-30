@@ -110,9 +110,6 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
 
         if (this._status !== SyncPlayerStatus.Playing) {
             try {
-                if (this._currentTime >= this._duration) {
-                    await this.seekImpl(0);
-                }
                 await this.playImpl();
             } catch (e) {
                 if (
@@ -163,7 +160,7 @@ export abstract class AtomPlayer extends EventEmitter<AtomPlayerEvents> {
             return;
         }
 
-        if (ms > this.duration) {
+        if (ms >= this.duration) {
             await this.stop();
             return;
         }

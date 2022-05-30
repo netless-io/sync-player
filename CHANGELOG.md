@@ -9,3 +9,7 @@
 -   Reduce frame drop checking frequency
 
     Frame drop correction may cause dead loop. Reduce the checking frequency to improved fault tolerance.
+
+## 1.0.3
+
+-   Fix a bug when syncing sub players' states, ClusterPlayer make assume a sub-player is ended if it's first frame is not loaded yet(duration 0).

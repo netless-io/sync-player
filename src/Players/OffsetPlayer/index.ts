@@ -23,14 +23,11 @@ export class OffsetPlayer extends AtomPlayer {
     }
 
     public constructor({ offset, player, ...config }: OffsetPlayerConfig) {
-        super(config);
-        if (!config.name) {
-            config.name = player.name;
-        }
+        super({ ...config, name: config.name || `Offset<${player.name}>` });
         this.player = player;
         this._offset = offset || 0;
 
-        this.timer = new TickPlayer({ duration: this._offset });
+        this.timer = new TickPlayer({ name: `Tick<${this.name}>`, duration: this._offset });
         this.playbackRate = this.player.playbackRate;
 
         this._currentPlayer = this._offset > 0 ? this.timer : this.player;
