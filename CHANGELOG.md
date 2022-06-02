@@ -13,3 +13,7 @@
 ## 1.0.3
 
 -   Fix a bug when syncing sub players' states, ClusterPlayer make assume a sub-player is ended if it's first frame is not loaded yet(duration 0).
+
+## 1.0.4
+
+-   Check pause status when Error on video player.

@@ -55,7 +55,7 @@ export class ChromeAtomPlayer extends AtomPlayer {
         );
 
         addVideoListener("error", () => {
-            if (this.status === SyncPlayerStatus.Playing) {
+            if (this.status === SyncPlayerStatus.Playing && this.video.paused()) {
                 this.status = SyncPlayerStatus.Buffering;
             }
         });
