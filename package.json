@@ -1,6 +1,6 @@
 {
     "name": "@netless/sync-player",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "homepage": "https://github.com/netless-io/sync-player",
