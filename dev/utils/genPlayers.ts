@@ -1,3 +1,4 @@
+import Hls from "hls.js";
 import videoJS, { VideoJsPlayer } from "video.js";
 import { Player, WhiteWebSdk } from "white-web-sdk";
 import { renderTime } from "./video-controller";
@@ -49,6 +50,54 @@ export function genVideo(videoSRC: string): VideoItem {
 
 export function genVideos(videoSRCs: string[]): VideoItem[] {
     return videoSRCs.map(genVideo);
+}
+
+export function genNativeVideo(videoSRC: string): HTMLVideoElement {
+    const $video = document.createElement("video");
+    $video.className = "video native";
+    $video.preload = "auto";
+    $video.width = 240;
+    $video.height = 180;
+
+    const $container = document.createElement("div");
+    $container.className = "player-container";
+
+    const $currentTime = document.createElement("div");
+    $currentTime.className = "player-container-current-time";
+    $currentTime.textContent = renderTime(0);
+
+    const $source = document.createElement("source");
+    $source.src = videoSRC;
+
+    $video.appendChild($source);
+
+    $container.appendChild($video);
+    $container.appendChild($currentTime);
+    document.body.appendChild($container);
+
+    if (/\.m3u8/i.test(videoSRC) && Hls.isSupported()) {
+        const hls = new Hls();
+        hls.attachMedia($video);
+        hls.on(Hls.Events.MEDIA_ATTACHED, function hls_media_attached() {
+            console.log("hls - media attached");
+            hls.loadSource(videoSRC);
+            hls.on(Hls.Events.MANIFEST_PARSED, function hls_manifest_parsed(event, data) {
+                console.log("hls - found", data.levels.length, "quality level(s):", data.levels);
+            });
+        });
+    } else if ($video.canPlayType("application/vnd.apple.mpegurl")) {
+        $video.src = videoSRC;
+    }
+
+    $video.addEventListener("timeupdate", () => {
+        $currentTime.textContent = renderTime($video.currentTime * 1000);
+    });
+
+    return $video;
+}
+
+export function genNativeVideos(videoSRCs: string[]): HTMLVideoElement[] {
+    return videoSRCs.map(genNativeVideo);
 }
 
 export interface WhiteboardItem {

@@ -1,14 +1,24 @@
 import "video.js/dist/video-js.css";
 import "./style.css";
 
-import { OffsetPlayer, SelectionPlayer, SyncPlayer, VideoPlayer, WhiteboardPlayer } from "../src";
+import {
+    NativeVideoPlayer,
+    OffsetPlayer,
+    SelectionPlayer,
+    SyncPlayer,
+    VideoPlayer,
+    WhiteboardPlayer,
+} from "../src";
 import { videoController } from "./utils/video-controller";
-import { genVideos, genWhiteboards } from "./utils/genPlayers";
+import { genNativeVideos, genVideos, genWhiteboards } from "./utils/genPlayers";
 
 async function main(): Promise<void> {
     const videos = genVideos([
         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
+    ]);
+
+    const nativeVideos = genNativeVideos([
         "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4",
     ]);
 
@@ -43,6 +53,14 @@ async function main(): Promise<void> {
             }),
     );
 
+    const nativeVideoPlayers = nativeVideos.map(
+        (video, index) =>
+            new NativeVideoPlayer({
+                video,
+                name: `native-player${index + 1}`,
+            }),
+    );
+
     const whiteboardPlayers = whiteboards.map(
         (item, index) =>
             new WhiteboardPlayer({
@@ -69,7 +87,9 @@ async function main(): Promise<void> {
         videos[1].video.toggleClass("video-hidden", !videoPlayers[1].visible);
     });
 
-    const syncPlayer = new SyncPlayer({ players: [...videoPlayers, ...whiteboardPlayers] });
+    const syncPlayer = new SyncPlayer({
+        players: [...videoPlayers, ...nativeVideoPlayers, ...whiteboardPlayers],
+    });
 
     videoController(syncPlayer);
 }
