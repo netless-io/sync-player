@@ -83,7 +83,6 @@ export class NativeVideoPlayer extends AtomPlayer {
         });
 
         const setCurrentTime = (): void => {
-            console.log("setCurrentTime", this.video.currentTime);
             this.currentTime = this.video.currentTime * 1000;
         };
         setCurrentTime();
