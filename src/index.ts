@@ -1,6 +1,11 @@
 import { AtomPlayer } from "./Players/AtomPlayer";
 import { ClusterPlayer } from "./Players/ClusterPlayer";
 
+export { AtomPlayer };
+
+export { NativeVideoPlayer } from "./Players/NativeVideoPlayer";
+export type { NativeVideoPlayerConfig } from "./Players/NativeVideoPlayer";
+
 export { VideoPlayer } from "./Players/VideoPlayer";
 export type { VideoPlayerConfig } from "./Players/VideoPlayer";
 

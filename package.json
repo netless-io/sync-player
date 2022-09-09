@@ -19,6 +19,7 @@
         "@types/video.js": "^7.3.17",
         "@typescript-eslint/eslint-plugin": "^4.23.0",
         "@typescript-eslint/parser": "^4.23.0",
+        "@wopjs/dom": "^0.1.2",
         "babel-loader": "^8.2.2",
         "babel-plugin-const-enum": "^1.0.1",
         "css-loader": "^5.2.4",
@@ -27,6 +28,7 @@
         "eslint-plugin-prettier": "^3.4.0",
         "eslint-webpack-plugin": "^2.5.4",
         "fork-ts-checker-webpack-plugin": "^6.2.7",
+        "hls.js": "^1.2.1",
         "html-webpack-plugin": "4",
         "peer-deps-externals-webpack-plugin": "^1.0.4",
         "prettier": "^2.3.0",
@@ -41,7 +43,7 @@
     "dependencies": {
         "@babel/runtime": "^7.14.0",
         "eventemitter3": "^4.0.7",
-        "side-effect-manager": "^0.1.5",
+        "side-effect-manager": "^1.2.1",
         "video.js": "^7.11.8"
     },
     "peerDependencies": {
