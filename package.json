@@ -1,6 +1,6 @@
 {
   "name": "@netless/sync-player",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "sideEffects": false,
   "main": "./dist/sync-player.js",
   "module": "./dist/sync-player.mjs",
