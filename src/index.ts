@@ -16,17 +16,22 @@ export { OffsetPlayer } from "./Players/OffsetPlayer";
 export type { OffsetPlayerConfig } from "./Players/OffsetPlayer";
 
 export { SelectionPlayer } from "./Players/SelectionPlayer";
-export type { SelectionPlayerConfig, SelectionPlayerSelection } from "./Players/SelectionPlayer";
+export type {
+  SelectionPlayerConfig,
+  SelectionPlayerSelection,
+} from "./Players/SelectionPlayer";
 
 export { SyncPlayerStatus } from "./Types";
 
 export interface SyncPlayerConfig {
-    players: AtomPlayer[];
+  players: AtomPlayer[];
 }
 
-export const SyncPlayer = function SyncPlayer(config: SyncPlayerConfig): AtomPlayer {
-    return config.players.reduce(
-        (combinedPlayer, player) =>
-            new ClusterPlayer({ rowPlayer: combinedPlayer, colPlayer: player }),
-    );
+export const SyncPlayer = function SyncPlayer(
+  config: SyncPlayerConfig
+): AtomPlayer {
+  return config.players.reduce(
+    (combinedPlayer, player) =>
+      new ClusterPlayer({ rowPlayer: combinedPlayer, colPlayer: player })
+  );
 } as unknown as new (config: SyncPlayerConfig) => AtomPlayer;

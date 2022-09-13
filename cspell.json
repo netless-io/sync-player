@@ -1,0 +1,24 @@
+{
+  "language": "en",
+  "words": [
+    "coverallsapp",
+    "CRIMX",
+    "lcov",
+    "playbackrate",
+    "pnpm",
+    "preinstall",
+    "typedoc",
+    "Vals",
+    "vite",
+    "vitest",
+    "wopjs"
+  ],
+  "ignorePaths": [
+    "**/coverage/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "cspell.config.js",
+    "pnpm-lock.yaml",
+    "CHANGELOG.md"
+  ]
+}

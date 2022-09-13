@@ -1,4 +1,4 @@
-*.js
 node_modules/
 dist/
-idea/
+public/
+pnpm-lock.yaml
