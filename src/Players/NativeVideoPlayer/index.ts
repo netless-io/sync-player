@@ -56,11 +56,7 @@ export class NativeVideoPlayer extends AtomPlayer {
 
         const eventType = e.type;
 
-        if (
-          this.video.paused ||
-          eventType === "seeking" ||
-          eventType === "waiting"
-        ) {
+        if (this.video.paused || eventType === "seeking") {
           if (
             this.status !== SyncPlayerStatus.Pause &&
             this.status !== SyncPlayerStatus.Ready
