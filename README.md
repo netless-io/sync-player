@@ -4,12 +4,13 @@ Plays multiple media(videos or whiteboards) at the same time with synchronized p
 
 ## Overview
 
--   `AtomPlayer`: Abstract class for anything that is playable.
-    -   `VideoPlayer`: For `videojs` supported media.
-    -   `WhiteboardPlayer`: For [Netless Whiteboard](https://developer.netless.link/javascript-en/home/replay) replay room.
-    -   `OffsetPlayer`: Add blank offset before an `AtomPlayer`.
-    -   `SelectionPlayer`: Cherry-pick segments of an `AtomPlayer`.
-    -   `SyncPlayer`: Play groups of `AtomPlayer`s at the same time with synchronized progress and speed.
+- `AtomPlayer`: Abstract class for anything that is playable.
+  - `NativeVideoPlayer`: For native `<video>` element.
+  - `VideoPlayer`: For `videojs` supported media.
+  - `WhiteboardPlayer`: For [Netless Whiteboard](https://developer.netless.link/javascript-en/home/replay) replay room.
+  - `OffsetPlayer`: Add blank offset before an `AtomPlayer`.
+  - `SelectionPlayer`: Cherry-pick segments of an `AtomPlayer`.
+  - `SyncPlayer`: Play groups of `AtomPlayer`s at the same time with synchronized progress and speed.
 
 ## Install
 
@@ -24,11 +25,20 @@ You may clone this repo and run the [dev example](https://github.com/netless-io/
 ### Basic
 
 ```ts
-import videojs from "video.js";
-import { VideoPlayer, SyncPlayer, OffsetPlayer } from "@netless/sync-player";
+import {
+  NativeVideoPlayer,
+  SyncPlayer,
+  OffsetPlayer,
+} from "@netless/sync-player";
 
-const player1 = new VideoPlayer({ video: videojs("#video1"), name: "video1" });
-const player2 = new VideoPlayer({ video: videojs("#video2"), name: "video2" });
+const player1 = new NativeVideoPlayer({
+  video: document.querySelector("#video1"),
+  name: "video1",
+});
+const player2 = new NativeVideoPlayer({
+  video: document.querySelector("#video2"),
+  name: "video2",
+});
 
 const syncPlayer = new SyncPlayer({ players: [player1, player2] });
 
@@ -49,7 +59,7 @@ const offsetPlayer = new OffsetPlayer({ offset: 3000, player: videoPlayer });
 // add css to hide the video element
 video.toggleClass("hidden", !player.visible);
 offsetPlayer.on("visibilitychange", () => {
-    video.toggleClass("hidden", !player.visible);
+  video.toggleClass("hidden", !player.visible);
 });
 ```
 
@@ -58,16 +68,16 @@ offsetPlayer.on("visibilitychange", () => {
 You may trim any `AtomPlayer` to selected parts by providing a selection list.
 
 ```ts
-const video = videojs("#video1");
-const videoPlayer = new VideoPlayer({ video, name: "video1" });
+const video = document.querySelector("#video1");
+const videoPlayer = new NativeVideoPlayer({ video, name: "video1" });
 console.log(videoPlayer.duration); // let's say it's 15000
 
 const selectionPlayer = new SelectionPlayer({
-    player: videoPlayer,
-    selectionList: [
-        { start: 0, duration: 1000 },
-        { start: 3000, duration: 9000 },
-    ],
+  player: videoPlayer,
+  selectionList: [
+    { start: 0, duration: 1000 },
+    { start: 3000, duration: 9000 },
+  ],
 });
 console.log(selectionPlayer.duration); // 7000
 ```
@@ -91,6 +101,14 @@ const whiteboardPlayer = new WhiteboardPlayer({ player: room });
 const syncPlayer = new SyncPlayer({ players: [videoPlayer1, videoPlayer2, whiteboardPlayer] });
 
 syncPlayer.play();
+```
+
+### TypeScript
+
+```ts
+import { AtomPlayer, SyncPlayer } from "@netless/sync-player";
+
+const syncPlayer: AtomPlayer = new SyncPlayer({ ... });
 ```
 
 ## API
@@ -127,7 +145,7 @@ Duration(in millisecond) of the longest media.
 console.log(syncPlayer.duration);
 
 syncPlayer.on("durationchange", () => {
-    console.log(syncPlayer.duration);
+  console.log(syncPlayer.duration);
 });
 ```
 
@@ -141,7 +159,7 @@ console.log(syncPlayer.currentTime);
 syncPlayer.seek(1000);
 
 syncPlayer.on("timeupdate", () => {
-    console.log(syncPlayer.currentTime);
+  console.log(syncPlayer.currentTime);
 });
 ```
 
@@ -149,18 +167,18 @@ syncPlayer.on("timeupdate", () => {
 
 Player status.
 
--   `Pause` Player paused by user invoking `player.pause()`.
--   `Ready` Player paused by controller.
--   `Buffering` Player is buffering.
--   `Playing` Player is playing.
--   `Ended` Player ends.
+- `Pause` Player paused by user invoking `player.pause()`.
+- `Ready` Player paused by controller.
+- `Buffering` Player is buffering.
+- `Playing` Player is playing.
+- `Ended` Player ends.
 
 ```ts
 // Ready | Pause | Buffering | Playing | Ended
 console.log(syncPlayer.status);
 
 syncPlayer.on("status", () => {
-    console.log(syncPlayer.status);
+  console.log(syncPlayer.status);
 });
 ```
 
@@ -173,7 +191,7 @@ console.log(syncPlayer.playbackRate);
 syncPlayer.setPlaybackRate(0.5);
 
 syncPlayer.on("ratechange", () => {
-    console.log(syncPlayer.playbackRate);
+  console.log(syncPlayer.playbackRate);
 });
 ```
 
@@ -185,6 +203,6 @@ A hint for visibility changes for `OffsetPlayer`. `player.visible` is `false` wh
 console.log(syncPlayer.visible);
 
 syncPlayer.on("visibilitychange", () => {
-    console.log(syncPlayer.visible);
+  console.log(syncPlayer.visible);
 });
 ```

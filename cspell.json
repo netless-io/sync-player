@@ -3,12 +3,17 @@
   "words": [
     "coverallsapp",
     "CRIMX",
+    "durationchange",
     "lcov",
     "playbackrate",
     "pnpm",
     "preinstall",
+    "ratechange",
+    "timeupdate",
     "typedoc",
     "Vals",
+    "videojs",
+    "visibilitychange",
     "vite",
     "vitest",
     "wopjs"
